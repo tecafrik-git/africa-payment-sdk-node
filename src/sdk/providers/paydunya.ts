@@ -10,7 +10,9 @@ import {
 import { ApisauceInstance, create } from "apisauce";
 import EventEmitter2 from "eventemitter2";
 import {
+  PaymentCancelledEvent,
   PaymentEventType,
+  PaymentFailedEvent,
   PaymentInitiatedEvent,
   PaymentSuccessfulEvent,
 } from "../payment-events";
@@ -188,19 +190,13 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       console.error("Invalid hash in Paydunya webhook body");
       return;
     }
+    const paymentMethod =
+      body.customer.payment_method === "wave_senegal"
+        ? PaymentMethod.WAVE
+        : body.customer.payment_method === "orange_money_senegal"
+        ? PaymentMethod.ORANGE_MONEY
+        : null;
     if (body.status === "completed" && body.response_code == "00") {
-      const paymentMethod =
-        body.customer.payment_method === "wave_senegal"
-          ? PaymentMethod.WAVE
-          : body.customer.payment_method === "orange_money_senegal"
-          ? PaymentMethod.ORANGE_MONEY
-          : null;
-      if (!paymentMethod) {
-        console.error(
-          "Unknown payment method: " + body.customer.payment_method
-        );
-        return;
-      }
       const paymentSuccessfulEvent: PaymentSuccessfulEvent = {
         type: PaymentEventType.PAYMENT_SUCCESSFUL,
         paymentMethod,
@@ -213,6 +209,36 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       this.eventEmitter?.emit(
         PaymentEventType.PAYMENT_SUCCESSFUL,
         paymentSuccessfulEvent
+      );
+    } else if (body.status === "cancelled") {
+      const paymentCancelledEvent: PaymentCancelledEvent = {
+        type: PaymentEventType.PAYMENT_CANCELLED,
+        paymentMethod,
+        transactionAmount: Number(body.invoice.total_amount),
+        transactionCurrency: Currency.XOF,
+        transactionId: body.custom_data.transaction_id,
+        transactionReference: body.invoice.token,
+        metadata: body.custom_data,
+        reason: body.response_text,
+      };
+      this.eventEmitter?.emit(
+        PaymentEventType.PAYMENT_CANCELLED,
+        paymentCancelledEvent
+      );
+    } else if (body.status === "failed") {
+      const paymentFailedEvent: PaymentFailedEvent = {
+        type: PaymentEventType.PAYMENT_FAILED,
+        paymentMethod,
+        transactionAmount: Number(body.invoice.total_amount),
+        transactionCurrency: Currency.XOF,
+        transactionId: body.custom_data.transaction_id,
+        transactionReference: body.invoice.token,
+        metadata: body.custom_data,
+        reason: body.response_text,
+      };
+      this.eventEmitter?.emit(
+        PaymentEventType.PAYMENT_FAILED,
+        paymentFailedEvent
       );
     }
   }
