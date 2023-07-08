@@ -1,5 +1,11 @@
+import EventEmitter2 from "eventemitter2";
+
 interface PaymentProvider {
   checkout(options: CheckoutOptions): Promise<CheckoutResult>;
+
+  useEventEmitter(eventEmitter: EventEmitter2): void;
+
+  handleWebhook(body: Record<string, any>): Promise<void>;
 }
 
 enum PaymentMethod {

@@ -6,3 +6,4 @@ export { PaydunyaPaymentProvider };
 
 export * from "./src/sdk/payment-provider.interface";
 export * from "./src/sdk/providers/paydunya";
+export * from "./src/sdk/payment-events";

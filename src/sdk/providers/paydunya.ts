@@ -8,9 +8,16 @@ import {
   TransactionStatus,
 } from "../payment-provider.interface";
 import { ApisauceInstance, create } from "apisauce";
+import EventEmitter2 from "eventemitter2";
+import {
+  PaymentEventType,
+  PaymentInitiatedEvent,
+  PaymentSuccessfulEvent,
+} from "../payment-events";
 
 class PaydunyaPaymentProvider implements PaymentProvider {
   private api: ApisauceInstance;
+  private eventEmitter?: EventEmitter2;
 
   constructor(private config: PaydunyaPaymentProviderConfig) {
     this.api = create({
@@ -39,6 +46,10 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         );
       }
     });
+  }
+
+  useEventEmitter(eventEmitter: EventEmitter2) {
+    this.eventEmitter = eventEmitter;
   }
 
   async checkout(options: CheckoutOptions): Promise<CheckoutResult> {
@@ -126,7 +137,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         );
       }
 
-      return {
+      const result: CheckoutResult = {
         success: true,
         message: waveData.message,
         transactionAmount: options.amount,
@@ -136,11 +147,58 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         transactionStatus: TransactionStatus.PENDING,
         redirectUrl: waveData.url,
       };
+
+      const paymentInitiatedEvent: PaymentInitiatedEvent = {
+        type: PaymentEventType.PAYMENT_INITIATED,
+        paymentMethod: options.paymentMethod,
+        transactionId: options.transactionId,
+        transactionAmount: options.amount,
+        transactionCurrency: options.currency,
+        transactionReference: invoiceToken,
+        redirectUrl: waveData.url,
+        metadata: options.metadata,
+      };
+      this.eventEmitter?.emit(
+        PaymentEventType.PAYMENT_INITIATED,
+        paymentInitiatedEvent
+      );
+
+      return result;
     } else if (options.paymentMethod === PaymentMethod.ORANGE_MONEY) {
       throw new Error("Orange Money is not supported yet");
     } else {
       throw new Error(
         "Paydunya does not support the payment method: " + options.paymentMethod
+      );
+    }
+  }
+
+  async handleWebhook(body: PaydunyaPaymentWebhookBody): Promise<void> {
+    if (body.status === "completed" && body.response_code == "00") {
+      const paymentMethod =
+        body.customer.payment_method === "wave_senegal"
+          ? PaymentMethod.WAVE
+          : body.customer.payment_method === "orange_money_senegal"
+          ? PaymentMethod.ORANGE_MONEY
+          : null;
+      if (!paymentMethod) {
+        console.error(
+          "Unknown payment method: " + body.customer.payment_method
+        );
+        return;
+      }
+      const paymentSuccessfulEvent: PaymentSuccessfulEvent = {
+        type: PaymentEventType.PAYMENT_SUCCESSFUL,
+        paymentMethod,
+        transactionAmount: Number(body.invoice.total_amount),
+        transactionCurrency: Currency.XOF,
+        transactionId: body.custom_data.transaction_id,
+        transactionReference: body.invoice.token,
+        metadata: body.custom_data,
+      };
+      this.eventEmitter?.emit(
+        PaymentEventType.PAYMENT_SUCCESSFUL,
+        paymentSuccessfulEvent
       );
     }
   }
@@ -178,6 +236,38 @@ type PaydunyaWavePaymentSuccessResponse = {
 type PaydunyaWavePaymentErrorResponse = {
   success: false | undefined;
   message: string;
+};
+
+type PaydunyaPaymentWebhookBody = {
+  response_code: string;
+  response_text: string;
+  hash: string;
+  invoice: {
+    token: string;
+    pal_is_on: string;
+    total_amount: string;
+    total_amount_without_fees: string;
+    description: string;
+    expire_date: string;
+  };
+  custom_data: Record<string, any>;
+  actions: {
+    cancel_url: string;
+    callback_url: string;
+    return_url: string;
+  };
+  mode: string;
+  status: string;
+  fail_reason: string;
+  customer: {
+    name: string;
+    phone: string;
+    email: string;
+    payment_method: string;
+  };
+  receipt_identifier: string;
+  receipt_url: string;
+  provider_reference: string;
 };
 
 export default PaydunyaPaymentProvider;
