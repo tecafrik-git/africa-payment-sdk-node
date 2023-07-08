@@ -55,8 +55,6 @@ type CheckoutOptions =
   | CreditCardCheckoutOptions;
 
 type CheckoutResult = {
-  success: boolean;
-  message: string;
   transactionId: string;
   transactionReference: string;
   transactionStatus: TransactionStatus;

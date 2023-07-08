@@ -224,8 +224,6 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     }
 
     const result: CheckoutResult = {
-      success: true,
-      message: paydunyaPaymentResponse.message,
       transactionAmount: options.amount,
       transactionCurrency: options.currency,
       transactionId: options.transactionId,
