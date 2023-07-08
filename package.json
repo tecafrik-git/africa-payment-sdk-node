@@ -1,0 +1,26 @@
+{
+  "name": "@tecafrik/africa-payment-sdk",
+  "version": "0.0.1",
+  "description": "A single SDK to integrate all african payment providers seamlessly",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "build:watch": "npx tsc --watch"
+  },
+  "keywords": [
+    "africa",
+    "payment",
+    "mobile",
+    "money"
+  ],
+  "author": "Saalihou Ndiaye",
+  "license": "MIT",
+  "dependencies": {
+    "apisauce": "^3.0.1",
+    "libphonenumber-js": "^1.10.37"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  }
+}
