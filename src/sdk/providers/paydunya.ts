@@ -14,10 +14,12 @@ import {
   PaymentInitiatedEvent,
   PaymentSuccessfulEvent,
 } from "../payment-events";
+import { createHash } from "crypto";
 
 class PaydunyaPaymentProvider implements PaymentProvider {
   private api: ApisauceInstance;
   private eventEmitter?: EventEmitter2;
+  private masterKeySha512Hash: string;
 
   constructor(private config: PaydunyaPaymentProviderConfig) {
     this.api = create({
@@ -46,6 +48,10 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         );
       }
     });
+
+    const hash = createHash("sha512");
+    hash.update(this.config.masterKey, "utf-8");
+    this.masterKeySha512Hash = hash.digest("hex");
   }
 
   useEventEmitter(eventEmitter: EventEmitter2) {
@@ -174,6 +180,14 @@ class PaydunyaPaymentProvider implements PaymentProvider {
   }
 
   async handleWebhook(body: PaydunyaPaymentWebhookBody): Promise<void> {
+    if (!body.hash) {
+      console.error("Missing hash in Paydunya webhook body");
+      return;
+    }
+    if (body.hash !== this.masterKeySha512Hash) {
+      console.error("Invalid hash in Paydunya webhook body");
+      return;
+    }
     if (body.status === "completed" && body.response_code == "00") {
       const paymentMethod =
         body.customer.payment_method === "wave_senegal"
