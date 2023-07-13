@@ -3,6 +3,8 @@ import EventEmitter2 from "eventemitter2";
 interface PaymentProvider {
   checkout(options: CheckoutOptions): Promise<CheckoutResult>;
 
+  refund(options: RefundOptions): Promise<RefundResult>;
+
   useEventEmitter(eventEmitter: EventEmitter2): void;
 
   handleWebhook(body: Record<string, any>): Promise<void>;
@@ -70,6 +72,20 @@ enum TransactionStatus {
   CANCELLED = "CANCELLED",
 }
 
+type RefundOptions = {
+  transactionId: string;
+  refundedTransactionReference: string;
+  refundedAmount?: number;
+};
+
+type RefundResult = {
+  transactionId: string;
+  transactionReference: string;
+  transactionStatus: TransactionStatus;
+  transactionAmount: number;
+  transactionCurrency: Currency;
+};
+
 export {
   PaymentProvider,
   PaymentMethod,
@@ -81,4 +97,6 @@ export {
   CheckoutOptions,
   CheckoutResult,
   TransactionStatus,
+  RefundOptions,
+  RefundResult,
 };

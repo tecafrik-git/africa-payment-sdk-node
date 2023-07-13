@@ -5,6 +5,8 @@ import {
   Currency,
   PaymentMethod,
   PaymentProvider,
+  RefundOptions,
+  RefundResult,
   TransactionStatus,
 } from "../payment-provider.interface";
 import { ApisauceInstance, create } from "apisauce";
@@ -256,6 +258,97 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     return result;
   }
 
+  async refund(options: RefundOptions): Promise<RefundResult> {
+    const transactionReference = options.refundedTransactionReference;
+    const getInvoiceResponse = await this.api.get<
+      PaydunyaGetInvoiceSuccessResponse,
+      PaydunyaGetInvoiceErrorResponse
+    >(`/checkout-invoice/confirm/${transactionReference}`);
+
+    if (!getInvoiceResponse.data) {
+      throw new PaymentError("Paydunya error: " + getInvoiceResponse.problem);
+    }
+
+    if (getInvoiceResponse.data.response_code !== "00") {
+      throw new PaymentError(
+        "Paydunya error: " + getInvoiceResponse.data.response_text
+      );
+    }
+
+    if (!("invoice" in getInvoiceResponse.data)) {
+      throw new PaymentError(
+        "Missing invoice in Paydunya response: " +
+          getInvoiceResponse.data.response_text
+      );
+    }
+
+    const invoiceToRefund = getInvoiceResponse.data.invoice;
+
+    const amountToRefund =
+      options.refundedAmount || parseInt(invoiceToRefund.total_amount, 10);
+    const createDisburseInvoiceResponse = await this.api.post<
+      PaydunyaCreateDisburseInvoiceSuccessResponse,
+      PaydunyaCreateDisburseInvoiceErrorResponse
+    >("/disburse/get-invoice", {
+      account_alias: getInvoiceResponse.data.customer.phone,
+      amount: amountToRefund,
+      withdraw_mode: getInvoiceResponse.data.customer.payment_method.replace(
+        "_",
+        "-"
+      ),
+    });
+
+    debugger;
+    if (!createDisburseInvoiceResponse.data) {
+      throw new PaymentError(
+        "Paydunya error: " + createDisburseInvoiceResponse.problem
+      );
+    }
+
+    if (createDisburseInvoiceResponse.data.response_code !== "00") {
+      throw new PaymentError(
+        "Paydunya error: " + createDisburseInvoiceResponse.data.response_text
+      );
+    }
+
+    if (!("disburse_token" in createDisburseInvoiceResponse.data)) {
+      throw new PaymentError(
+        "Missing disburse token in Paydunya response: " +
+          createDisburseInvoiceResponse.data.response_text
+      );
+    }
+
+    const submitDisburseInvoiceResponse = await this.api.post<
+      PaydunyaSubmitDisburseInvoiceSuccessResponse,
+      PaydunyaSubmitDisburseInvoiceErrorResponse
+    >("/disburse/submit-invoice", {
+      disburse_invoice: createDisburseInvoiceResponse.data.disburse_token,
+      disburse_id: options.transactionId,
+    });
+
+    debugger;
+    if (!submitDisburseInvoiceResponse.data) {
+      throw new PaymentError(
+        "Paydunya error: " + submitDisburseInvoiceResponse.problem
+      );
+    }
+
+    if (submitDisburseInvoiceResponse.data.response_code !== "00") {
+      throw new PaymentError(
+        "Paydunya error: " + submitDisburseInvoiceResponse.data.response_text
+      );
+    }
+
+    debugger;
+    return {
+      transactionAmount: amountToRefund,
+      transactionId: options.transactionId,
+      transactionReference: createDisburseInvoiceResponse.data.disburse_token,
+      transactionCurrency: Currency.XOF,
+      transactionStatus: TransactionStatus.SUCCESS,
+    };
+  }
+
   async handleWebhook(body: PaydunyaPaymentWebhookBody): Promise<void> {
     if (!body.hash) {
       console.error("Missing hash in Paydunya webhook body");
@@ -338,7 +431,7 @@ type PaydunyaCreateInvoiceSuccessResponse = {
 };
 
 type PaydunyaCreateInvoiceErrorResponse = {
-  response_code: string;
+  response_code: Exclude<string, "00">;
   response_text: string;
 };
 
@@ -369,14 +462,7 @@ type PaydunyaPaymentWebhookBody = {
   response_code: string;
   response_text: string;
   hash: string;
-  invoice: {
-    token: string;
-    pal_is_on: string;
-    total_amount: string;
-    total_amount_without_fees: string;
-    description: string;
-    expire_date: string;
-  };
+  invoice: PaydunyaInvoice;
   custom_data: Record<string, any>;
   actions: {
     cancel_url: string;
@@ -395,6 +481,67 @@ type PaydunyaPaymentWebhookBody = {
   receipt_identifier: string;
   receipt_url: string;
   provider_reference: string;
+};
+
+type PaydunyaInvoice = {
+  token: string;
+  pal_is_on: string;
+  total_amount: string;
+  total_amount_without_fees: string;
+  description: string;
+  expire_date: string;
+};
+
+type PaydunyaGetInvoiceSuccessResponse = {
+  response_code: "00";
+  response_text: string;
+  hash: string;
+  invoice: PaydunyaInvoice;
+  custom_data: Record<string, any>;
+  actions: {
+    cancel_url: string;
+    callback_url: string;
+    return_url: string;
+  };
+  mode: string;
+  status: string;
+  fail_reason: string;
+  customer: {
+    name: string;
+    phone: string;
+    email: string;
+    payment_method: string;
+  };
+  receipt_url: string;
+};
+
+type PaydunyaGetInvoiceErrorResponse = {
+  response_code: Exclude<string, "00">;
+  response_text: string;
+};
+
+type PaydunyaCreateDisburseInvoiceSuccessResponse = {
+  response_code: "00";
+  response_text: never;
+  disburse_token: string;
+};
+
+type PaydunyaCreateDisburseInvoiceErrorResponse = {
+  response_code: Exclude<string, "00">;
+  response_text: string;
+};
+
+type PaydunyaSubmitDisburseInvoiceSuccessResponse = {
+  response_code: "00";
+  response_text: string;
+  description: string;
+  transaction_id: string;
+  provider_ref?: string;
+};
+
+type PaydunyaSubmitDisburseInvoiceErrorResponse = {
+  response_code: Exclude<string, "00">;
+  response_text: string;
 };
 
 export default PaydunyaPaymentProvider;

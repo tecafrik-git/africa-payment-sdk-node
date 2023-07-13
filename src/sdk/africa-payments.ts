@@ -5,7 +5,7 @@ import {
   PaymentInitiatedEvent,
   PaymentSuccessfulEvent,
 } from "./payment-events";
-import { CheckoutOptions, PaymentProvider } from "./payment-provider.interface";
+import { CheckoutOptions, PaymentProvider, RefundOptions } from "./payment-provider.interface";
 import { EventEmitter2 } from "eventemitter2";
 class AfricaPaymentsProvider extends EventEmitter2 {
   constructor(private provider: PaymentProvider) {
@@ -15,6 +15,10 @@ class AfricaPaymentsProvider extends EventEmitter2 {
 
   async checkout(options: CheckoutOptions) {
     return this.provider.checkout(options);
+  }
+
+  async refund(options: RefundOptions) {
+    return this.provider.refund(options);
   }
 
   async handleWebhook(requestBody: Record<string, any>) {
