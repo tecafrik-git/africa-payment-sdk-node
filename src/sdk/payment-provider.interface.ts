@@ -32,6 +32,8 @@ type BasicCheckoutOptions = {
     phoneNumber: string;
   };
   metadata?: Record<string, any>;
+  successRedirectUrl?: string;
+  failureRedirectUrl?: string;
 };
 
 type WaveCheckoutOptions = BasicCheckoutOptions & {

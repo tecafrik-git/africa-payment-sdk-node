@@ -119,6 +119,10 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         transaction_id: options.transactionId,
         ...options.metadata,
       },
+      actions: {
+        cancel_url: options.failureRedirectUrl,
+        return_url: options.successRedirectUrl,
+      },
     });
 
     const invoiceData = createInvoiceResponse.data;
