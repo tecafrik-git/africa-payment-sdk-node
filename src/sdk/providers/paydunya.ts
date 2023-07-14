@@ -287,7 +287,6 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     }
 
     const invoiceToRefund = getInvoiceResponse.data.invoice;
-
     const amountToRefund =
       options.refundedAmount || parseInt(invoiceToRefund.total_amount, 10);
     const createDisburseInvoiceResponse = await this.api.post<
@@ -297,7 +296,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       account_alias: getInvoiceResponse.data.customer.phone,
       amount: amountToRefund,
       withdraw_mode: getInvoiceResponse.data.customer.payment_method.replace(
-        "_",
+        /_/g,
         "-"
       ),
     });
