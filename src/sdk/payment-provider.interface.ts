@@ -1,7 +1,13 @@
 import EventEmitter2 from "eventemitter2";
 
 interface PaymentProvider {
-  checkout(options: CheckoutOptions): Promise<CheckoutResult>;
+  checkoutMobileMoney(
+    options: MobileMoneyCheckoutOptions
+  ): Promise<CheckoutResult>;
+
+  checkoutCreditCard(
+    options: CreditCardCheckoutOptions
+  ): Promise<CheckoutResult>;
 
   refund(options: RefundOptions): Promise<RefundResult>;
 
@@ -28,19 +34,23 @@ type BasicCheckoutOptions = {
   customer: {
     firstName: string;
     lastName: string;
-    email?: string;
-    phoneNumber: string;
   };
   metadata?: Record<string, any>;
   successRedirectUrl?: string;
   failureRedirectUrl?: string;
 };
 
-type WaveCheckoutOptions = BasicCheckoutOptions & {
+type BasicMobileMoneyCheckoutOptions = BasicCheckoutOptions & {
+  customer: BasicCheckoutOptions["customer"] & {
+    phoneNumber: string;
+  };
+};
+
+type WaveCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
   paymentMethod: PaymentMethod.WAVE;
 };
 
-type OrangeMoneyCheckoutOptions = BasicCheckoutOptions & {
+type OrangeMoneyCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
   paymentMethod: PaymentMethod.ORANGE_MONEY;
   authorizationCode: string;
 };
@@ -53,10 +63,9 @@ type CreditCardCheckoutOptions = BasicCheckoutOptions & {
   cardCvv: string;
 };
 
-type CheckoutOptions =
+type MobileMoneyCheckoutOptions =
   | WaveCheckoutOptions
-  | OrangeMoneyCheckoutOptions
-  | CreditCardCheckoutOptions;
+  | OrangeMoneyCheckoutOptions;
 
 type CheckoutResult = {
   transactionId: string;
@@ -93,10 +102,11 @@ export {
   PaymentMethod,
   Currency,
   BasicCheckoutOptions,
+  BasicMobileMoneyCheckoutOptions,
   WaveCheckoutOptions,
   OrangeMoneyCheckoutOptions,
   CreditCardCheckoutOptions,
-  CheckoutOptions,
+  MobileMoneyCheckoutOptions,
   CheckoutResult,
   TransactionStatus,
   RefundOptions,

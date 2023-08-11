@@ -1,6 +1,6 @@
-import { parsePhoneNumber } from "libphonenumber-js";
+import { PhoneNumber, parsePhoneNumber } from "libphonenumber-js";
 import {
-  CheckoutOptions,
+  MobileMoneyCheckoutOptions,
   CheckoutResult,
   Currency,
   PaymentMethod,
@@ -8,6 +8,7 @@ import {
   RefundOptions,
   RefundResult,
   TransactionStatus,
+  CreditCardCheckoutOptions,
 } from "../payment-provider.interface";
 import { ApisauceInstance, create } from "apisauce";
 import EventEmitter2 from "eventemitter2";
@@ -81,29 +82,18 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     this.eventEmitter = eventEmitter;
   }
 
-  async checkout(options: CheckoutOptions): Promise<CheckoutResult> {
+  async checkout(
+    options: MobileMoneyCheckoutOptions | CreditCardCheckoutOptions
+  ): Promise<CheckoutResult> {
     if (options.currency !== Currency.XOF) {
       throw new PaymentError(
         "Paydunya does not support the currency: " + options.currency,
         PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
       );
     }
-    const parsedCustomerPhoneNumber = parsePhoneNumber(
-      options.customer.phoneNumber,
-      "SN"
-    );
-    if (!parsedCustomerPhoneNumber.isValid()) {
-      throw new PaymentError(
-        "Invalid phone number: " + options.customer.phoneNumber,
-        PaymentErrorType.INVALID_PHONE_NUMBER
-      );
-    }
-    if (!parsedCustomerPhoneNumber.isPossible()) {
-      throw new PaymentError(
-        "Phone number is not possible: " + options.customer.phoneNumber,
-        PaymentErrorType.INVALID_PHONE_NUMBER
-      );
-    }
+    const isMobileMoney =
+      options.paymentMethod === PaymentMethod.WAVE ||
+      options.paymentMethod === PaymentMethod.ORANGE_MONEY;
     const createInvoiceResponse = await this.api.post<
       PaydunyaCreateInvoiceSuccessResponse,
       PaydunyaCreateInvoiceErrorResponse
@@ -115,6 +105,10 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       store: {
         name: this.config.store.name,
       },
+      channels:
+        options.paymentMethod === PaymentMethod.CREDIT_CARD
+          ? ["card"]
+          : null,
       custom_data: {
         transaction_id: options.transactionId,
         ...options.metadata,
@@ -151,83 +145,97 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       | PaydunyaOrangeMoneyPaymentSuccessResponse
       | null = null;
 
-    if (
-      options.paymentMethod !== PaymentMethod.WAVE &&
-      options.paymentMethod !== PaymentMethod.ORANGE_MONEY
-    ) {
-      throw new PaymentError(
-        "Paydunya does not support the payment method: " +
-          options.paymentMethod,
-        PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
+    if (isMobileMoney) {
+      const parsedCustomerPhoneNumber = parsePhoneNumber(
+        options.customer.phoneNumber,
+        "SN"
       );
+      if (!parsedCustomerPhoneNumber.isValid()) {
+        throw new PaymentError(
+          "Invalid phone number: " + options.customer.phoneNumber,
+          PaymentErrorType.INVALID_PHONE_NUMBER
+        );
+      }
+      if (!parsedCustomerPhoneNumber.isPossible()) {
+        throw new PaymentError(
+          "Phone number is not possible: " + options.customer.phoneNumber,
+          PaymentErrorType.INVALID_PHONE_NUMBER
+        );
+      }
+
+      if (options.paymentMethod === PaymentMethod.WAVE) {
+        const paydunyaWaveResponse = await this.api.post<
+          PaydunyaWavePaymentSuccessResponse,
+          PaydunyaWavePaymentErrorResponse
+        >("/softpay/wave-senegal", {
+          wave_senegal_fullName: `${options.customer.firstName || ""} ${
+            options.customer.lastName || ""
+          }`.trim(),
+          wave_senegal_email: `${options.customer.phoneNumber}@yopmail.com`,
+          wave_senegal_phone: parsedCustomerPhoneNumber.nationalNumber,
+          wave_senegal_payment_token: invoiceToken,
+        });
+
+        const waveData = paydunyaWaveResponse.data;
+
+        if (!waveData) {
+          throw new PaymentError(
+            "Paydunya error: " + paydunyaWaveResponse.problem
+          );
+        }
+
+        if (!waveData.success) {
+          throw new PaymentError("Paydunya error: " + waveData.message);
+        }
+
+        if (!waveData.url) {
+          throw new PaymentError(
+            "Missing wave payment url in Paydunya response: " + waveData.message
+          );
+        }
+        paydunyaPaymentResponse = waveData;
+      } else if (options.paymentMethod === PaymentMethod.ORANGE_MONEY) {
+        const paydunyaOrangeMoneyResponse = await this.api.post<
+          PaydunyaOrangeMoneyPaymentSuccessResponse,
+          PaydunyaOrangeMoneyPaymentErrorResponse
+        >("/softpay/orange-money-senegal", {
+          customer_name: `${options.customer.firstName || ""} ${
+            options.customer.lastName || ""
+          }`.trim(),
+          customer_email: `${options.customer.phoneNumber}@yopmail.com`,
+          phone_number: parsedCustomerPhoneNumber.nationalNumber,
+          authorization_code: options.authorizationCode,
+          invoice_token: invoiceToken,
+        });
+
+        const orangeMoneyData = paydunyaOrangeMoneyResponse.data;
+
+        if (!orangeMoneyData) {
+          throw new PaymentError(
+            "Paydunya error: " + paydunyaOrangeMoneyResponse.problem
+          );
+        }
+
+        if (!orangeMoneyData.success) {
+          throw new PaymentError("Paydunya error: " + orangeMoneyData.message);
+        }
+        paydunyaPaymentResponse = orangeMoneyData;
+      }
     }
 
-    if (options.paymentMethod === PaymentMethod.WAVE) {
-      const paydunyaWaveResponse = await this.api.post<
-        PaydunyaWavePaymentSuccessResponse,
-        PaydunyaWavePaymentErrorResponse
-      >("/softpay/wave-senegal", {
-        wave_senegal_fullName: `${options.customer.firstName || ""} ${
-          options.customer.lastName || ""
-        }`.trim(),
-        wave_senegal_email:
-          options.customer.email ||
-          `${options.customer.phoneNumber}@yopmail.com`,
-        wave_senegal_phone: parsedCustomerPhoneNumber.nationalNumber,
-        wave_senegal_payment_token: invoiceToken,
-      });
-
-      const waveData = paydunyaWaveResponse.data;
-
-      if (!waveData) {
-        throw new PaymentError(
-          "Paydunya error: " + paydunyaWaveResponse.problem
-        );
-      }
-
-      if (!waveData.success) {
-        throw new PaymentError("Paydunya error: " + waveData.message);
-      }
-
-      if (!waveData.url) {
-        throw new PaymentError(
-          "Missing wave payment url in Paydunya response: " + waveData.message
-        );
-      }
-      paydunyaPaymentResponse = waveData;
-    } else if (options.paymentMethod === PaymentMethod.ORANGE_MONEY) {
-      const paydunyaOrangeMoneyResponse = await this.api.post<
-        PaydunyaOrangeMoneyPaymentSuccessResponse,
-        PaydunyaOrangeMoneyPaymentErrorResponse
-      >("/softpay/orange-money-senegal", {
-        customer_name: `${options.customer.firstName || ""} ${
-          options.customer.lastName || ""
-        }`.trim(),
-        customer_email:
-          options.customer.email ||
-          `${options.customer.phoneNumber}@yopmail.com`,
-        phone_number: parsedCustomerPhoneNumber.nationalNumber,
-        authorization_code: options.authorizationCode,
-        invoice_token: invoiceToken,
-      });
-
-      const orangeMoneyData = paydunyaOrangeMoneyResponse.data;
-
-      if (!orangeMoneyData) {
-        throw new PaymentError(
-          "Paydunya error: " + paydunyaOrangeMoneyResponse.problem
-        );
-      }
-
-      if (!orangeMoneyData.success) {
-        throw new PaymentError("Paydunya error: " + orangeMoneyData.message);
-      }
-      paydunyaPaymentResponse = orangeMoneyData;
-    }
-
-    if (!paydunyaPaymentResponse) {
+    if (
+      options.paymentMethod !== PaymentMethod.CREDIT_CARD &&
+      !paydunyaPaymentResponse
+    ) {
       throw new PaymentError("Paydunya error: no payment response data");
     }
+
+    const redirectUrl =
+      options.paymentMethod === PaymentMethod.CREDIT_CARD
+        ? invoiceData.response_text
+        : paydunyaPaymentResponse && "url" in paydunyaPaymentResponse
+        ? paydunyaPaymentResponse.url
+        : undefined;
 
     const result: CheckoutResult = {
       transactionAmount: options.amount,
@@ -235,10 +243,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       transactionId: options.transactionId,
       transactionReference: invoiceToken,
       transactionStatus: TransactionStatus.PENDING,
-      redirectUrl:
-        "url" in paydunyaPaymentResponse
-          ? paydunyaPaymentResponse.url
-          : undefined,
+      redirectUrl,
     };
 
     const paymentInitiatedEvent: PaymentInitiatedEvent = {
@@ -248,10 +253,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       transactionAmount: options.amount,
       transactionCurrency: options.currency,
       transactionReference: invoiceToken,
-      redirectUrl:
-        "url" in paydunyaPaymentResponse
-          ? paydunyaPaymentResponse.url
-          : undefined,
+      redirectUrl,
       metadata: options.metadata,
     };
     this.eventEmitter?.emit(
@@ -260,6 +262,18 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     );
 
     return result;
+  }
+
+  async checkoutMobileMoney(
+    options: MobileMoneyCheckoutOptions
+  ): Promise<CheckoutResult> {
+    return this.checkout(options);
+  }
+
+  async checkoutCreditCard(
+    options: CreditCardCheckoutOptions
+  ): Promise<CheckoutResult> {
+    return this.checkout(options);
   }
 
   async refund(options: RefundOptions): Promise<RefundResult> {

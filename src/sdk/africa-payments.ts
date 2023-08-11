@@ -5,7 +5,12 @@ import {
   PaymentInitiatedEvent,
   PaymentSuccessfulEvent,
 } from "./payment-events";
-import { CheckoutOptions, PaymentProvider, RefundOptions } from "./payment-provider.interface";
+import {
+  CreditCardCheckoutOptions,
+  MobileMoneyCheckoutOptions,
+  PaymentProvider,
+  RefundOptions,
+} from "./payment-provider.interface";
 import { EventEmitter2 } from "eventemitter2";
 class AfricaPaymentsProvider extends EventEmitter2 {
   constructor(private provider: PaymentProvider) {
@@ -13,8 +18,12 @@ class AfricaPaymentsProvider extends EventEmitter2 {
     provider.useEventEmitter(this);
   }
 
-  async checkout(options: CheckoutOptions) {
-    return this.provider.checkout(options);
+  async checkoutMobileMoney(options: MobileMoneyCheckoutOptions) {
+    return this.provider.checkoutMobileMoney(options);
+  }
+
+  async checkoutCreditCard(options: CreditCardCheckoutOptions) {
+    return this.provider.checkoutCreditCard(options);
   }
 
   async refund(options: RefundOptions) {
