@@ -58,7 +58,7 @@ Depending on the provider, the `checkoutResult` may contain a `redirectUrl` that
 - Handle webhooks and listen for events
 
 ```typescript
-// body comes from the JSON request body sent by the provider to your webhook endpoint
+// body comes from the raw request body (buffer or string) sent by the provider to your webhook endpoint
 // you will need to configure that endpoint in the provider's interface most likely
 africaPayments.handleWebhook(body);
 africaPayments.on(PaymentEventType.PAYMENT_SUCCESSFUL, async (event) => {
