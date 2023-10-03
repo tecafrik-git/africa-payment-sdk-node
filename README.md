@@ -78,6 +78,19 @@ africaPayments.on(PaymentEventType.PAYMENT_SUCCESSFUL, async (event) => {
 });
 ```
 
+
+## Test with the bogus payment provider
+
+In a testing environment, you do not want to make actual payments. Not all payment providers provide a sandbox mode and even when they do, not all of the features in the sandbox are testable. For integration tests you most likely don't want to involve external APIs, even sandbox ones.
+
+That's why we made a `BogusPaymentProvider` that fakes all the checkout methods and webhook handling logic. It follows simple rules:
+- For mobile money checkout, any phone number that ends with `13` will trigger a payment failure event and redirect to the failure url
+- For credit card checkout, any card number that ends with `13` will trigger a payment failure event and redirect to the failure url
+- For redirect checkout, any email that ends with `@failure.com` will trigger a payment failure event and redirect to the failure url
+- Anything else will trigger a success event and redirect to the success url
+
+This is when the `instantEvents` config is set to `true`. You can however opt into a more manual success/failure trigger mechanism by calling `handleWebhook` with various body payloads. The schema for the body can be found under the typescript type `BogusPaymentProviderWebhookBody`.
+
 ## API Reference
 
 Coming soon. The project is written in TypeScript so feel free to browse the API via your IDE's intellisense features.
