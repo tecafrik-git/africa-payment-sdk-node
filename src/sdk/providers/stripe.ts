@@ -126,7 +126,6 @@ class StripePaymentProvider implements PaymentProvider {
   }
 
   async refund(options: RefundOptions): Promise<RefundResult> {
-    debugger;
     const checkoutSession = await this.stripe.checkout.sessions.retrieve(
       options.refundedTransactionReference
     );
@@ -173,7 +172,6 @@ class StripePaymentProvider implements PaymentProvider {
       return;
     }
     let event: Stripe.Event;
-    debugger;
     try {
       event = this.stripe.webhooks.constructEvent(
         rawBody,

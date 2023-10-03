@@ -321,7 +321,6 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       ),
     });
 
-    debugger;
     if (!createDisburseInvoiceResponse.data) {
       throw new PaymentError(
         "Paydunya error: " + createDisburseInvoiceResponse.problem
@@ -349,7 +348,6 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       disburse_id: options.transactionId,
     });
 
-    debugger;
     if (!submitDisburseInvoiceResponse.data) {
       throw new PaymentError(
         "Paydunya error: " + submitDisburseInvoiceResponse.problem
