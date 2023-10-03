@@ -1,4 +1,4 @@
-import { PhoneNumber, parsePhoneNumber } from "libphonenumber-js";
+import { parsePhoneNumber } from "libphonenumber-js";
 import {
   MobileMoneyCheckoutOptions,
   CheckoutResult,
@@ -106,9 +106,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         name: this.config.store.name,
       },
       channels:
-        options.paymentMethod === PaymentMethod.CREDIT_CARD
-          ? ["card"]
-          : null,
+        options.paymentMethod === PaymentMethod.CREDIT_CARD ? ["card"] : null,
       custom_data: {
         transaction_id: options.transactionId,
         ...options.metadata,
@@ -276,6 +274,13 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     return this.checkout(options);
   }
 
+  async checkoutRedirect(): Promise<CheckoutResult> {
+    throw new PaymentError(
+      "Paydunya redirect checkout not yet implemented",
+      PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
+    );
+  }
+
   async refund(options: RefundOptions): Promise<RefundResult> {
     const transactionReference = options.refundedTransactionReference;
     const getInvoiceResponse = await this.api.get<
@@ -356,7 +361,6 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       );
     }
 
-    debugger;
     return {
       transactionAmount: amountToRefund,
       transactionId: options.transactionId,
@@ -366,7 +370,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     };
   }
 
-  async handleWebhook(body: PaydunyaPaymentWebhookBody): Promise<void> {
+  async handleWebhook(rawBody: Buffer | string): Promise<void> {
+    const body = JSON.parse(rawBody.toString()) as PaydunyaPaymentWebhookBody;
     if (!body.hash) {
       console.error("Missing hash in Paydunya webhook body");
       return;

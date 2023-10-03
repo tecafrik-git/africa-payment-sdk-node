@@ -1,3 +1,4 @@
+import { castArray } from "lodash";
 import {
   PaymentCancelledEvent,
   PaymentEventType,
@@ -7,31 +8,91 @@ import {
 } from "./payment-events";
 import {
   CreditCardCheckoutOptions,
+  HandleWebhookOptions,
   MobileMoneyCheckoutOptions,
   PaymentProvider,
+  RedirectCheckoutOptions,
   RefundOptions,
 } from "./payment-provider.interface";
 import { EventEmitter2 } from "eventemitter2";
+import { PaymentError, PaymentErrorType } from "./payment-error";
 class AfricaPaymentsProvider extends EventEmitter2 {
-  constructor(private provider: PaymentProvider) {
+  private providers: PaymentProvider[];
+  constructor(
+    providers: PaymentProvider | [PaymentProvider, ...PaymentProvider[]]
+  ) {
     super();
-    provider.useEventEmitter(this);
+    this.providers = castArray(providers);
+    this.providers.forEach((provider) => {
+      provider.useEventEmitter(this);
+    });
   }
 
   async checkoutMobileMoney(options: MobileMoneyCheckoutOptions) {
-    return this.provider.checkoutMobileMoney(options);
+    return this.tryEachProvider((provider) =>
+      provider.checkoutMobileMoney(options)
+    );
   }
 
   async checkoutCreditCard(options: CreditCardCheckoutOptions) {
-    return this.provider.checkoutCreditCard(options);
+    return this.tryEachProvider((provider) =>
+      provider.checkoutCreditCard(options)
+    );
+  }
+
+  async checkoutRedirect(options: RedirectCheckoutOptions) {
+    return this.tryEachProvider((provider) =>
+      provider.checkoutRedirect(options)
+    );
+  }
+
+  async tryEachProvider<T>(
+    callback: (provider: PaymentProvider) => T | Promise<T>
+  ): Promise<T> {
+    for (const provider of this.providers) {
+      try {
+        return await callback(provider);
+      } catch (error) {
+        const err = error as PaymentError;
+        if (err.type === PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD) {
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw new Error("No payment provider was able to process the request");
   }
 
   async refund(options: RefundOptions) {
-    return this.provider.refund(options);
+    const providerToUse = this.providers.find(
+      (provider) =>
+        !options.provider || provider.constructor.name === options.provider
+    );
+    if (!providerToUse) {
+      throw new PaymentError(
+        `No provider found with name ${options.provider}`,
+        PaymentErrorType.UNKNOWN_ERROR
+      );
+    }
+    return providerToUse.refund(options);
   }
 
-  async handleWebhook(requestBody: Record<string, any>) {
-    return this.provider.handleWebhook(requestBody);
+  async handleWebhook(
+    requestBody: Buffer | string,
+    options?: HandleWebhookOptions
+  ) {
+    const providerToUse = this.providers.find(
+      (provider) =>
+        !options?.providerName ||
+        provider.constructor.name === options.providerName
+    );
+    if (!providerToUse) {
+      throw new PaymentError(
+        `No provider found with name ${options?.providerName}`,
+        PaymentErrorType.UNKNOWN_ERROR
+      );
+    }
+    return providerToUse.handleWebhook(requestBody, options);
   }
 
   on(

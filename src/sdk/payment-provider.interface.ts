@@ -9,11 +9,16 @@ interface PaymentProvider {
     options: CreditCardCheckoutOptions
   ): Promise<CheckoutResult>;
 
+  checkoutRedirect(options: RedirectCheckoutOptions): Promise<CheckoutResult>;
+
   refund(options: RefundOptions): Promise<RefundResult>;
 
   useEventEmitter(eventEmitter: EventEmitter2): void;
 
-  handleWebhook(body: Record<string, any>): Promise<void>;
+  handleWebhook(
+    body: Buffer | string,
+    options?: HandleWebhookOptions
+  ): Promise<void>;
 }
 
 enum PaymentMethod {
@@ -34,8 +39,9 @@ type BasicCheckoutOptions = {
   customer: {
     firstName: string;
     lastName: string;
+    email?: string;
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   successRedirectUrl?: string;
   failureRedirectUrl?: string;
 };
@@ -63,6 +69,12 @@ type CreditCardCheckoutOptions = BasicCheckoutOptions & {
   cardCvv: string;
 };
 
+type RedirectCheckoutOptions = BasicCheckoutOptions & {
+  paymentMethod: PaymentMethod;
+  successRedirectUrl: string;
+  failureRedirectUrl: string;
+};
+
 type MobileMoneyCheckoutOptions =
   | WaveCheckoutOptions
   | OrangeMoneyCheckoutOptions;
@@ -87,6 +99,7 @@ type RefundOptions = {
   transactionId: string;
   refundedTransactionReference: string;
   refundedAmount?: number;
+  provider?: string;
 };
 
 type RefundResult = {
@@ -95,6 +108,11 @@ type RefundResult = {
   transactionStatus: TransactionStatus;
   transactionAmount: number;
   transactionCurrency: Currency;
+};
+
+type HandleWebhookOptions = {
+  headers?: Record<string, string>;
+  providerName?: string;
 };
 
 export {
@@ -106,9 +124,11 @@ export {
   WaveCheckoutOptions,
   OrangeMoneyCheckoutOptions,
   CreditCardCheckoutOptions,
+  RedirectCheckoutOptions,
   MobileMoneyCheckoutOptions,
   CheckoutResult,
   TransactionStatus,
   RefundOptions,
   RefundResult,
+  HandleWebhookOptions,
 };

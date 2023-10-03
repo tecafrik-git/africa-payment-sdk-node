@@ -19,9 +19,12 @@
   "dependencies": {
     "apisauce": "^3.0.1",
     "eventemitter2": "^6.4.9",
-    "libphonenumber-js": "^1.10.37"
+    "libphonenumber-js": "^1.10.37",
+    "lodash": "^4.17.21",
+    "stripe": "^13.8.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.199",
     "@types/node": "^20.4.1",
     "typescript": "^5.1.6"
   }
