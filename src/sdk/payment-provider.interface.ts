@@ -99,7 +99,7 @@ type RefundOptions = {
   transactionId: string;
   refundedTransactionReference: string;
   refundedAmount?: number;
-  provider?: string;
+  providerName?: string;
 };
 
 type RefundResult = {

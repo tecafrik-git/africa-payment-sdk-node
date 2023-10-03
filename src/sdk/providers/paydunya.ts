@@ -253,6 +253,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       transactionReference: invoiceToken,
       redirectUrl,
       metadata: options.metadata,
+      paymentProvider: PaydunyaPaymentProvider.name,
     };
     this.eventEmitter?.emit(
       PaymentEventType.PAYMENT_INITIATED,
@@ -395,6 +396,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         transactionId: body.custom_data.transaction_id,
         transactionReference: body.invoice.token,
         metadata: body.custom_data,
+        paymentProvider: PaydunyaPaymentProvider.name,
       };
       this.eventEmitter?.emit(
         PaymentEventType.PAYMENT_SUCCESSFUL,
@@ -410,6 +412,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         transactionReference: body.invoice.token,
         metadata: body.custom_data,
         reason: body.response_text,
+        paymentProvider: PaydunyaPaymentProvider.name,
       };
       this.eventEmitter?.emit(
         PaymentEventType.PAYMENT_CANCELLED,
@@ -425,6 +428,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         transactionReference: body.invoice.token,
         metadata: body.custom_data,
         reason: body.response_text,
+        paymentProvider: PaydunyaPaymentProvider.name,
       };
       this.eventEmitter?.emit(
         PaymentEventType.PAYMENT_FAILED,

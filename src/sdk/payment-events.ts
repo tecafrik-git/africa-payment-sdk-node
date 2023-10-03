@@ -16,6 +16,7 @@ export type PaymentInitiatedEvent = {
   paymentMethod: PaymentMethod | null;
   metadata?: Record<string, any>;
   redirectUrl?: string;
+  paymentProvider: string;
 };
 
 export type PaymentSuccessfulEvent = {
@@ -26,6 +27,7 @@ export type PaymentSuccessfulEvent = {
   transactionCurrency: Currency;
   metadata?: Record<string, any>;
   paymentMethod: PaymentMethod | null;
+  paymentProvider: string;
 };
 
 export type PaymentFailedEvent = {
@@ -37,6 +39,7 @@ export type PaymentFailedEvent = {
   paymentMethod: PaymentMethod | null;
   metadata?: Record<string, any>;
   reason: string;
+  paymentProvider: string;
 };
 
 export type PaymentCancelledEvent = {
@@ -48,4 +51,5 @@ export type PaymentCancelledEvent = {
   paymentMethod: PaymentMethod | null;
   metadata?: Record<string, any>;
   reason: string;
+  paymentProvider: string;
 };

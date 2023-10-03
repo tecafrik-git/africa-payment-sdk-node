@@ -66,11 +66,11 @@ class AfricaPaymentsProvider extends EventEmitter2 {
   async refund(options: RefundOptions) {
     const providerToUse = this.providers.find(
       (provider) =>
-        !options.provider || provider.constructor.name === options.provider
+        !options.providerName || provider.constructor.name === options.providerName
     );
     if (!providerToUse) {
       throw new PaymentError(
-        `No provider found with name ${options.provider}`,
+        `No provider found with name ${options.providerName}`,
         PaymentErrorType.UNKNOWN_ERROR
       );
     }

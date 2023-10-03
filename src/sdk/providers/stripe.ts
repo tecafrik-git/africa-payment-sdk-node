@@ -20,7 +20,7 @@ import {
 } from "../payment-events";
 import Stripe from "stripe";
 import { PaymentError, PaymentErrorType } from "../payment-error";
-import { mapValues } from "lodash";
+import { isString, mapValues } from "lodash";
 
 class StripePaymentProvider implements PaymentProvider {
   private eventEmitter?: EventEmitter2;
@@ -126,10 +126,37 @@ class StripePaymentProvider implements PaymentProvider {
   }
 
   async refund(options: RefundOptions): Promise<RefundResult> {
-    throw new PaymentError(
-      "Stripe does not support refunds",
-      PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
+    debugger;
+    const checkoutSession = await this.stripe.checkout.sessions.retrieve(
+      options.refundedTransactionReference
     );
+    if (!checkoutSession) {
+      throw new PaymentError(
+        "No checkout session found with reference " +
+          options.refundedTransactionReference,
+        PaymentErrorType.UNKNOWN_ERROR
+      );
+    }
+    if (!checkoutSession.payment_intent) {
+      throw new PaymentError(
+        "No payment intent found for checkout session " + checkoutSession.id,
+        PaymentErrorType.UNKNOWN_ERROR
+      );
+    }
+    const refund = await this.stripe.refunds.create({
+      payment_intent: isString(checkoutSession.payment_intent)
+        ? checkoutSession.payment_intent
+        : checkoutSession.payment_intent.id,
+      amount: options.refundedAmount,
+      reason: "requested_by_customer",
+    });
+    return {
+      transactionAmount: refund.amount,
+      transactionCurrency: refund.currency as Currency,
+      transactionId: options.transactionId,
+      transactionReference: refund.id,
+      transactionStatus: TransactionStatus.SUCCESS,
+    };
   }
 
   async handleWebhook(
@@ -171,6 +198,7 @@ class StripePaymentProvider implements PaymentProvider {
         transactionId: session.metadata?.transactionId,
         transactionReference: session.id,
         metadata: parseMetadata(session.metadata),
+        paymentProvider: StripePaymentProvider.name,
       };
       this.eventEmitter?.emit(
         PaymentEventType.PAYMENT_SUCCESSFUL,
@@ -206,6 +234,7 @@ class StripePaymentProvider implements PaymentProvider {
         transactionId: session.metadata?.transactionId,
         transactionReference: session.id,
         metadata: parseMetadata(session.metadata),
+        paymentProvider: StripePaymentProvider.name,
       };
       this.eventEmitter?.emit(
         PaymentEventType.PAYMENT_INITIATED,
@@ -233,6 +262,7 @@ class StripePaymentProvider implements PaymentProvider {
         transactionReference: session.id,
         metadata: parseMetadata(session.metadata),
         reason: "Payment failed",
+        paymentProvider: StripePaymentProvider.name,
       };
       this.eventEmitter?.emit(
         PaymentEventType.PAYMENT_FAILED,
