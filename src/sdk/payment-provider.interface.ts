@@ -16,7 +16,7 @@ interface PaymentProvider {
   useEventEmitter(eventEmitter: EventEmitter2): void;
 
   handleWebhook(
-    body: Buffer | string,
+    body: Buffer | string | Record<string, unknown>,
     options?: HandleWebhookOptions
   ): Promise<void>;
 }

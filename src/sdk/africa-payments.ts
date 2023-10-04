@@ -78,7 +78,7 @@ class AfricaPaymentsProvider extends EventEmitter2 {
   }
 
   async handleWebhook(
-    requestBody: Buffer | string,
+    requestBody: Buffer | string | Record<string, unknown>,
     options?: HandleWebhookOptions
   ) {
     const providerToUse = this.providers.find(

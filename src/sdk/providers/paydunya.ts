@@ -21,6 +21,7 @@ import {
 } from "../payment-events";
 import { createHash } from "crypto";
 import { PaymentError, PaymentErrorType } from "../payment-error";
+import { isBuffer, isString } from "lodash";
 
 class PaydunyaPaymentProvider implements PaymentProvider {
   private api: ApisauceInstance;
@@ -369,8 +370,12 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     };
   }
 
-  async handleWebhook(rawBody: Buffer | string): Promise<void> {
-    const body = JSON.parse(rawBody.toString()) as PaydunyaPaymentWebhookBody;
+  async handleWebhook(rawBody: Buffer | string | Record<string, unknown>): Promise<void> {
+    if (isBuffer(rawBody) || isString(rawBody)) {
+      console.error("Paydunya webhook body must be a parsed object, not the raw body");
+      return;
+    }
+    const body = rawBody as PaydunyaPaymentWebhookBody;
     if (!body.hash) {
       console.error("Missing hash in Paydunya webhook body");
       return;
