@@ -373,13 +373,17 @@ class PaydunyaPaymentProvider implements PaymentProvider {
   }
 
   async payoutMobileMoney(options: MobileMoneyPayoutOptions): Promise<PayoutResult> {
+    const paymentMethodToWithdrawMode: Record<MobileMoneyPayoutOptions['paymentMethod'], string> = {
+      [PaymentMethod.WAVE]: "wave-senegal",
+      [PaymentMethod.ORANGE_MONEY]: "orange-money-senegal",
+    }
     const createDisburseInvoiceResponse = await this.api.post<
       PaydunyaCreateDisburseInvoiceSuccessResponse,
       PaydunyaCreateDisburseInvoiceErrorResponse
     >("/disburse/get-invoice", {
       account_alias: options.recipient.phoneNumber,
       amount: options.amount,
-      withdraw_mode: options.paymentMethod.replace(/_/g, "-").toLowerCase(),
+      withdraw_mode: paymentMethodToWithdrawMode[options.paymentMethod],
     });
 
     if (!createDisburseInvoiceResponse.data) {
