@@ -11,6 +11,10 @@ interface PaymentProvider {
 
   checkoutRedirect(options: RedirectCheckoutOptions): Promise<CheckoutResult>;
 
+  payoutMobileMoney(
+    options: MobileMoneyPayoutOptions
+  ): Promise<PayoutResult>;
+
   refund(options: RefundOptions): Promise<RefundResult>;
 
   useEventEmitter(eventEmitter: EventEmitter2): void;
@@ -110,6 +114,26 @@ type RefundResult = {
   transactionCurrency: Currency;
 };
 
+type MobileMoneyPayoutOptions = {
+  paymentMethod: PaymentMethod.WAVE | PaymentMethod.ORANGE_MONEY;
+  amount: number;
+  currency: Currency;
+  recipient: {
+    phoneNumber: string;
+  };
+  transactionId: string;
+  transactionReference: string;
+  metadata?: Record<string, unknown>;
+};
+
+type PayoutResult = {
+  transactionId: string;
+  transactionReference: string;
+  transactionStatus: TransactionStatus;
+  transactionAmount: number;
+  transactionCurrency: Currency;
+}
+
 type HandleWebhookOptions = {
   headers?: Record<string, string>;
   providerName?: string;
@@ -131,4 +155,6 @@ export {
   RefundOptions,
   RefundResult,
   HandleWebhookOptions,
+  MobileMoneyPayoutOptions,
+  PayoutResult,
 };

@@ -10,6 +10,8 @@ import {
   PaymentMethod,
   HandleWebhookOptions,
   Currency,
+  MobileMoneyPayoutOptions,
+  PayoutResult,
 } from "../payment-provider.interface";
 import EventEmitter2 from "eventemitter2";
 import {
@@ -113,6 +115,7 @@ class BogusPaymentProvider implements PaymentProvider {
   }
 
   async refund(options: RefundOptions): Promise<RefundResult> {
+    console.debug("Refunding transaction", options.transactionId, options);
     return {
       transactionAmount: options.refundedAmount || 0,
       transactionCurrency: Currency.XOF,
@@ -143,6 +146,17 @@ class BogusPaymentProvider implements PaymentProvider {
       metadata: body.metadata,
       paymentProvider: BogusPaymentProvider.name,
     } as PaymentSuccessfulEvent | PaymentFailedEvent);
+  }
+
+  payoutMobileMoney(options: MobileMoneyPayoutOptions): Promise<PayoutResult> {
+    console.debug("Paying out mobile money", options);
+    return Promise.resolve({
+      transactionAmount: options.amount,
+      transactionCurrency: options.currency,
+      transactionId: options.transactionId,
+      transactionReference: `payout-transaction-reference`,
+      transactionStatus: TransactionStatus.SUCCESS,
+    });
   }
 }
 

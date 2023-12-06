@@ -10,6 +10,7 @@ import {
   CreditCardCheckoutOptions,
   HandleWebhookOptions,
   MobileMoneyCheckoutOptions,
+  MobileMoneyPayoutOptions,
   PaymentProvider,
   RedirectCheckoutOptions,
   RefundOptions,
@@ -43,6 +44,12 @@ class AfricaPaymentsProvider extends EventEmitter2 {
   async checkoutRedirect(options: RedirectCheckoutOptions) {
     return this.tryEachProvider((provider) =>
       provider.checkoutRedirect(options)
+    );
+  }
+
+  async payoutMobileMoney(options: MobileMoneyPayoutOptions) {
+    return this.tryEachProvider((provider) =>
+      provider.payoutMobileMoney(options)
     );
   }
 

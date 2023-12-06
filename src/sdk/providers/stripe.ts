@@ -10,6 +10,8 @@ import {
   PaymentMethod,
   HandleWebhookOptions,
   Currency,
+  MobileMoneyPayoutOptions,
+  PayoutResult,
 } from "../payment-provider.interface";
 import EventEmitter2 from "eventemitter2";
 import {
@@ -156,6 +158,13 @@ class StripePaymentProvider implements PaymentProvider {
       transactionReference: refund.id,
       transactionStatus: TransactionStatus.SUCCESS,
     };
+  }
+
+  payoutMobileMoney(options: MobileMoneyPayoutOptions): Promise<PayoutResult> {
+    throw new PaymentError(
+      "Stripe does not support mobile money payouts",
+      PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
+    );
   }
 
   async handleWebhook(

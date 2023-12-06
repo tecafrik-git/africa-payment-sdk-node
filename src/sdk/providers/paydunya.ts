@@ -9,6 +9,8 @@ import {
   RefundResult,
   TransactionStatus,
   CreditCardCheckoutOptions,
+  MobileMoneyPayoutOptions,
+  PayoutResult,
 } from "../payment-provider.interface";
 import { ApisauceInstance, create } from "apisauce";
 import EventEmitter2 from "eventemitter2";
@@ -366,6 +368,64 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       transactionId: options.transactionId,
       transactionReference: createDisburseInvoiceResponse.data.disburse_token,
       transactionCurrency: Currency.XOF,
+      transactionStatus: TransactionStatus.SUCCESS,
+    };
+  }
+
+  async payoutMobileMoney(options: MobileMoneyPayoutOptions): Promise<PayoutResult> {
+    const createDisburseInvoiceResponse = await this.api.post<
+      PaydunyaCreateDisburseInvoiceSuccessResponse,
+      PaydunyaCreateDisburseInvoiceErrorResponse
+    >("/disburse/get-invoice", {
+      account_alias: options.recipient.phoneNumber,
+      amount: options.amount,
+      withdraw_mode: options.paymentMethod.replace(/_/g, "-").toLowerCase(),
+    });
+
+    if (!createDisburseInvoiceResponse.data) {
+      throw new PaymentError(
+        "Paydunya error: " + createDisburseInvoiceResponse.problem
+      );
+    }
+
+    if (createDisburseInvoiceResponse.data.response_code !== "00") {
+      throw new PaymentError(
+        "Paydunya error: " + createDisburseInvoiceResponse.data.response_text
+      );
+    }
+
+    if (!("disburse_token" in createDisburseInvoiceResponse.data)) {
+      throw new PaymentError(
+        "Missing disburse token in Paydunya response: " +
+          createDisburseInvoiceResponse.data.response_text
+      );
+    }
+
+    const submitDisburseInvoiceResponse = await this.api.post<
+      PaydunyaSubmitDisburseInvoiceSuccessResponse,
+      PaydunyaSubmitDisburseInvoiceErrorResponse
+    >("/disburse/submit-invoice", {
+      disburse_invoice: createDisburseInvoiceResponse.data.disburse_token,
+      disburse_id: options.transactionId,
+    });
+
+    if (!submitDisburseInvoiceResponse.data) {
+      throw new PaymentError(
+        "Paydunya error: " + submitDisburseInvoiceResponse.problem
+      );
+    }
+
+    if (submitDisburseInvoiceResponse.data.response_code !== "00") {
+      throw new PaymentError(
+        "Paydunya error: " + submitDisburseInvoiceResponse.data.response_text
+      );
+    }
+
+    return {
+      transactionAmount: options.amount,
+      transactionId: options.transactionId,
+      transactionReference: createDisburseInvoiceResponse.data.disburse_token,
+      transactionCurrency: options.currency,
       transactionStatus: TransactionStatus.SUCCESS,
     };
   }
