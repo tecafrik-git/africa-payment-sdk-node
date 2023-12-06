@@ -377,11 +377,29 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       [PaymentMethod.WAVE]: "wave-senegal",
       [PaymentMethod.ORANGE_MONEY]: "orange-money-senegal",
     }
+    
+    const parsedRecipientPhoneNumber = parsePhoneNumber(
+      options.recipient.phoneNumber,
+      "SN"
+    );
+    if (!parsedRecipientPhoneNumber.isValid()) {
+      throw new PaymentError(
+        "Invalid phone number: " + options.recipient.phoneNumber,
+        PaymentErrorType.INVALID_PHONE_NUMBER
+      );
+    }
+    if (!parsedRecipientPhoneNumber.isPossible()) {
+      throw new PaymentError(
+        "Phone number is not possible: " + options.recipient.phoneNumber,
+        PaymentErrorType.INVALID_PHONE_NUMBER
+      );
+    }
+
     const createDisburseInvoiceResponse = await this.api.post<
       PaydunyaCreateDisburseInvoiceSuccessResponse,
       PaydunyaCreateDisburseInvoiceErrorResponse
     >("/disburse/get-invoice", {
-      account_alias: options.recipient.phoneNumber,
+      account_alias: parsedRecipientPhoneNumber.nationalNumber,
       amount: options.amount,
       withdraw_mode: paymentMethodToWithdrawMode[options.paymentMethod],
     });
