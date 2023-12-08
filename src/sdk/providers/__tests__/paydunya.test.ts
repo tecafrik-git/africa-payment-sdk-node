@@ -15,10 +15,11 @@ import MockAdapter from "axios-mock-adapter";
 let paydunyaPaymentProvider: PaydunyaPaymentProvider;
 let mockApi: MockAdapter;
 
-jest.mock<Pick<typeof apisauce, "create">>("apisauce", () => {
+jest.mock<typeof apisauce>("apisauce", () => {
+  const realApisauce = jest.requireActual<typeof apisauce>("apisauce");
   return {
+    ...realApisauce,
     create: jest.fn((config) => {
-      const realApisauce = jest.requireActual<typeof apisauce>("apisauce");
       const api = realApisauce.create(config);
       mockApi = new MockAdapter(api.axiosInstance);
       return api;
