@@ -1,0 +1,519 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calls orange money API and returns a checkout result on success 1`] = `
+{
+  "delete": [],
+  "get": [],
+  "head": [],
+  "link": [],
+  "list": [],
+  "options": [],
+  "patch": [],
+  "post": [
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"invoice":{"total_amount":100,"description":"description"},"store":{"name":"store-name"},"channels":null,"custom_data":{"transaction_id":"transactionId","text_meta":"value","number_meta":1,"boolean_meta":true},"actions":{"cancel_url":"https://example.com/failure","return_url":"https://example.com/success"}}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "checkout-invoice/create",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"customer_name":"Mamadou Diallo","customer_email":"+221781234567@yopmail.com","phone_number":"781234567","authorization_code":"12345","invoice_token":"token"}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "/softpay/orange-money-senegal",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
+  "put": [],
+  "unlink": [],
+}
+`;
+
+exports[`calls orange money API and returns a checkout result on success 2`] = `
+{
+  "redirectUrl": undefined,
+  "transactionAmount": 100,
+  "transactionCurrency": "XOF",
+  "transactionId": "transactionId",
+  "transactionReference": "token",
+  "transactionStatus": "PENDING",
+}
+`;
+
+exports[`calls paydunya cc API and returns a checkout result on success 1`] = `
+{
+  "delete": [],
+  "get": [],
+  "head": [],
+  "link": [],
+  "list": [],
+  "options": [],
+  "patch": [],
+  "post": [
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"invoice":{"total_amount":100,"description":"description"},"store":{"name":"store-name"},"channels":["card"],"custom_data":{"transaction_id":"transactionId","text_meta":"value","number_meta":1,"boolean_meta":true},"actions":{"cancel_url":"https://example.com/failure","return_url":"https://example.com/success"}}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "checkout-invoice/create",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
+  "put": [],
+  "unlink": [],
+}
+`;
+
+exports[`calls paydunya cc API and returns a checkout result on success 2`] = `
+{
+  "redirectUrl": "https://app.paydunya.com/sandbox/checkout/invoice/token",
+  "transactionAmount": 100,
+  "transactionCurrency": "XOF",
+  "transactionId": "transactionId",
+  "transactionReference": "token",
+  "transactionStatus": "PENDING",
+}
+`;
+
+exports[`calls wave API and returns a checkout result on success 1`] = `
+{
+  "delete": [],
+  "get": [],
+  "head": [],
+  "link": [],
+  "list": [],
+  "options": [],
+  "patch": [],
+  "post": [
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"invoice":{"total_amount":100,"description":"description"},"store":{"name":"store-name"},"channels":null,"custom_data":{"transaction_id":"transactionId","text_meta":"value","number_meta":1,"boolean_meta":true},"actions":{"cancel_url":"https://example.com/failure","return_url":"https://example.com/success"}}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "checkout-invoice/create",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"wave_senegal_fullName":"Mamadou Diallo","wave_senegal_email":"+221781234567@yopmail.com","wave_senegal_phone":"781234567","wave_senegal_payment_token":"token"}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "/softpay/wave-senegal",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
+  "put": [],
+  "unlink": [],
+}
+`;
+
+exports[`calls wave API and returns a checkout result on success 2`] = `
+{
+  "redirectUrl": "https://checkout.wave.com/checkout.js?token=token",
+  "transactionAmount": 100,
+  "transactionCurrency": "XOF",
+  "transactionId": "transactionId",
+  "transactionReference": "token",
+  "transactionStatus": "PENDING",
+}
+`;
+
+exports[`emits a payment initiated event when given an event emitter 1`] = `
+[MockFunction] {
+  "calls": [
+    [
+      "PAYMENT_INITIATED",
+      {
+        "metadata": {
+          "boolean_meta": true,
+          "number_meta": 1,
+          "text_meta": "value",
+        },
+        "paymentMethod": "WAVE",
+        "paymentProvider": "PaydunyaPaymentProvider",
+        "redirectUrl": "https://checkout.wave.com/checkout.js?token=token",
+        "transactionAmount": 100,
+        "transactionCurrency": "XOF",
+        "transactionId": "transactionId",
+        "transactionReference": "token",
+        "type": "PAYMENT_INITIATED",
+      },
+    ],
+  ],
+  "results": [
+    {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`makes a payout to the provided customer 1`] = `
+{
+  "delete": [],
+  "get": [],
+  "head": [],
+  "link": [],
+  "list": [],
+  "options": [],
+  "patch": [],
+  "post": [
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"account_alias":"781234567","amount":150,"withdraw_mode":"wave-senegal"}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "/disburse/get-invoice",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"disburse_invoice":"disburse_token","disburse_id":"transactionId"}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "/disburse/submit-invoice",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
+  "put": [],
+  "unlink": [],
+}
+`;
+
+exports[`makes a payout to the provided customer 2`] = `
+{
+  "transactionAmount": 150,
+  "transactionCurrency": "XOF",
+  "transactionId": "transactionId",
+  "transactionReference": "disburse_token",
+  "transactionStatus": "SUCCESS",
+}
+`;
+
+exports[`refunds a wave transaction properly 1`] = `
+{
+  "delete": [],
+  "get": [
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": undefined,
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "get",
+      "params": {},
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "/checkout-invoice/confirm/wave-transaction-reference",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
+  "head": [],
+  "link": [],
+  "list": [],
+  "options": [],
+  "patch": [],
+  "post": [
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"account_alias":"+221781234567","amount":100,"withdraw_mode":"wave-senegal"}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "/disburse/get-invoice",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+    {
+      "baseURL": "https://app.paydunya.com/api/v1/",
+      "data": "{"disburse_invoice":"disburse_token","disburse_id":"transactionId"}",
+      "env": {
+        "Blob": [Function],
+        "FormData": [Function],
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "PAYDUNYA-MASTER-KEY": "masterKey",
+        "PAYDUNYA-PRIVATE-KEY": "privateKey",
+        "PAYDUNYA-PUBLIC-KEY": "publicKey",
+        "PAYDUNYA-TOKEN": "token",
+      },
+      "maxBodyLength": -1,
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": [
+        [Function],
+      ],
+      "transformResponse": [
+        [Function],
+      ],
+      "transitional": {
+        "clarifyTimeoutError": false,
+        "forcedJSONParsing": true,
+        "silentJSONParsing": true,
+      },
+      "url": "/disburse/submit-invoice",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
+  "put": [],
+  "unlink": [],
+}
+`;
+
+exports[`refunds a wave transaction properly 2`] = `
+{
+  "transactionAmount": 100,
+  "transactionCurrency": "XOF",
+  "transactionId": "transactionId",
+  "transactionReference": "disburse_token",
+  "transactionStatus": "SUCCESS",
+}
+`;
+
+exports[`throws unsupported payment method error when using checkout redirect 1`] = `"Paydunya redirect checkout not yet implemented"`;

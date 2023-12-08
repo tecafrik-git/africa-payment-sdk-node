@@ -1,10 +1,10 @@
 {
   "name": "@tecafrik/africa-payment-sdk",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A single SDK to integrate all african payment providers seamlessly",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build": "npx tsc",
     "build:watch": "npx tsc --watch"
   },
@@ -24,8 +24,12 @@
     "stripe": "^13.8.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.11",
     "@types/lodash": "^4.14.199",
     "@types/node": "^20.4.1",
+    "axios-mock-adapter": "^1.22.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.1.6"
   }
 }

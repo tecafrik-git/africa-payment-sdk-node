@@ -11,6 +11,7 @@ import {
   CreditCardCheckoutOptions,
   MobileMoneyPayoutOptions,
   PayoutResult,
+  RedirectCheckoutOptions,
 } from "../payment-provider.interface";
 import { ApisauceInstance, create } from "apisauce";
 import EventEmitter2 from "eventemitter2";
@@ -278,7 +279,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     return this.checkout(options);
   }
 
-  async checkoutRedirect(): Promise<CheckoutResult> {
+  async checkoutRedirect(options: RedirectCheckoutOptions): Promise<CheckoutResult> {
     throw new PaymentError(
       "Paydunya redirect checkout not yet implemented",
       PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
@@ -523,7 +524,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
   }
 }
 
-type PaydunyaPaymentProviderConfig = {
+export type PaydunyaPaymentProviderConfig = {
   masterKey: string;
   privateKey: string;
   publicKey: string;
@@ -534,42 +535,42 @@ type PaydunyaPaymentProviderConfig = {
   };
 };
 
-type PaydunyaCreateInvoiceSuccessResponse = {
+export type PaydunyaCreateInvoiceSuccessResponse = {
   response_code: "00";
   response_text: string;
   description: string;
   token: string;
 };
 
-type PaydunyaCreateInvoiceErrorResponse = {
+export type PaydunyaCreateInvoiceErrorResponse = {
   response_code: Exclude<string, "00">;
   response_text: string;
 };
 
-type PaydunyaWavePaymentSuccessResponse = {
+export type PaydunyaWavePaymentSuccessResponse = {
   success: true;
   message: string;
   url: string;
 };
 
-type PaydunyaWavePaymentErrorResponse = {
+export type PaydunyaWavePaymentErrorResponse = {
   success: false | undefined;
   message: string;
 };
 
-type PaydunyaOrangeMoneyPaymentSuccessResponse = {
+export type PaydunyaOrangeMoneyPaymentSuccessResponse = {
   success: true;
   message: string;
   fees: number;
   currency: string;
 };
 
-type PaydunyaOrangeMoneyPaymentErrorResponse = {
+export type PaydunyaOrangeMoneyPaymentErrorResponse = {
   success: false | undefined;
   message: string;
 };
 
-type PaydunyaPaymentWebhookBody = {
+export type PaydunyaPaymentWebhookBody = {
   response_code: string;
   response_text: string;
   hash: string;
@@ -594,7 +595,7 @@ type PaydunyaPaymentWebhookBody = {
   provider_reference: string;
 };
 
-type PaydunyaInvoice = {
+export type PaydunyaInvoice = {
   token: string;
   pal_is_on: string;
   total_amount: string;
@@ -603,7 +604,7 @@ type PaydunyaInvoice = {
   expire_date: string;
 };
 
-type PaydunyaGetInvoiceSuccessResponse = {
+export type PaydunyaGetInvoiceSuccessResponse = {
   response_code: "00";
   response_text: string;
   hash: string;
@@ -626,23 +627,23 @@ type PaydunyaGetInvoiceSuccessResponse = {
   receipt_url: string;
 };
 
-type PaydunyaGetInvoiceErrorResponse = {
+export type PaydunyaGetInvoiceErrorResponse = {
   response_code: Exclude<string, "00">;
   response_text: string;
 };
 
-type PaydunyaCreateDisburseInvoiceSuccessResponse = {
+export type PaydunyaCreateDisburseInvoiceSuccessResponse = {
   response_code: "00";
-  response_text: never;
+  response_text?: never;
   disburse_token: string;
 };
 
-type PaydunyaCreateDisburseInvoiceErrorResponse = {
+export type PaydunyaCreateDisburseInvoiceErrorResponse = {
   response_code: Exclude<string, "00">;
   response_text: string;
 };
 
-type PaydunyaSubmitDisburseInvoiceSuccessResponse = {
+export type PaydunyaSubmitDisburseInvoiceSuccessResponse = {
   response_code: "00";
   response_text: string;
   description: string;
@@ -650,7 +651,7 @@ type PaydunyaSubmitDisburseInvoiceSuccessResponse = {
   provider_ref?: string;
 };
 
-type PaydunyaSubmitDisburseInvoiceErrorResponse = {
+export type PaydunyaSubmitDisburseInvoiceErrorResponse = {
   response_code: Exclude<string, "00">;
   response_text: string;
 };
