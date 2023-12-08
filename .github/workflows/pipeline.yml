@@ -3,10 +3,12 @@ name: Pipeline
 on:
   push:
     branches: ['main']
+  pull_request:
+    branches: ['main']
 
 jobs:
   build:
-    name: Build Image
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
