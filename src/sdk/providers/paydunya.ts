@@ -24,7 +24,7 @@ import {
 } from "../payment-events";
 import { createHash } from "crypto";
 import { PaymentError, PaymentErrorType } from "../payment-error";
-import { isBuffer, isString } from "lodash";
+import { isBuffer, isObject, isString } from "lodash";
 
 class PaydunyaPaymentProvider implements PaymentProvider {
   private api: ApisauceInstance;
@@ -65,12 +65,13 @@ class PaydunyaPaymentProvider implements PaymentProvider {
           response.status +
           ". Data: " +
           JSON.stringify(response.data);
+        console.error(response);
         throw new PaymentError(
-          response.data
+          response.data && isObject(response.data)
             ? "message" in response.data
-              ? response.data.message
+              ? String(response.data.message)
               : "response_text" in response.data
-              ? response.data.response_text
+              ? String(response.data.response_text)
               : defaultErrorMessage
             : defaultErrorMessage
         );
@@ -279,7 +280,9 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     return this.checkout(options);
   }
 
-  async checkoutRedirect(options: RedirectCheckoutOptions): Promise<CheckoutResult> {
+  async checkoutRedirect(
+    options: RedirectCheckoutOptions
+  ): Promise<CheckoutResult> {
     throw new PaymentError(
       "Paydunya redirect checkout not yet implemented",
       PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
@@ -373,12 +376,17 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     };
   }
 
-  async payoutMobileMoney(options: MobileMoneyPayoutOptions): Promise<PayoutResult> {
-    const paymentMethodToWithdrawMode: Record<MobileMoneyPayoutOptions['paymentMethod'], string> = {
+  async payoutMobileMoney(
+    options: MobileMoneyPayoutOptions
+  ): Promise<PayoutResult> {
+    const paymentMethodToWithdrawMode: Record<
+      MobileMoneyPayoutOptions["paymentMethod"],
+      string
+    > = {
       [PaymentMethod.WAVE]: "wave-senegal",
       [PaymentMethod.ORANGE_MONEY]: "orange-money-senegal",
-    }
-    
+    };
+
     const parsedRecipientPhoneNumber = parsePhoneNumber(
       options.recipient.phoneNumber,
       "SN"
@@ -453,9 +461,13 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     };
   }
 
-  async handleWebhook(rawBody: Buffer | string | Record<string, unknown>): Promise<void> {
+  async handleWebhook(
+    rawBody: Buffer | string | Record<string, unknown>
+  ): Promise<void> {
     if (isBuffer(rawBody) || isString(rawBody)) {
-      console.error("Paydunya webhook body must be a parsed object, not the raw body");
+      console.error(
+        "Paydunya webhook body must be a parsed object, not the raw body"
+      );
       return;
     }
     const body = rawBody as PaydunyaPaymentWebhookBody;
