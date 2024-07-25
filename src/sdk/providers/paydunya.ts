@@ -410,7 +410,9 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     >("/v2/disburse/get-invoice", {
       account_alias: parsedRecipientPhoneNumber.nationalNumber,
       amount: options.amount,
+      disburse_id: options.transactionId,
       withdraw_mode: paymentMethodToWithdrawMode[options.paymentMethod],
+      callback_url: this.config.callbackUrl,
     });
 
     if (!createDisburseInvoiceResponse.data) {
@@ -545,6 +547,7 @@ export type PaydunyaPaymentProviderConfig = {
   store: {
     name: string;
   };
+  callbackUrl: string;
 };
 
 export type PaydunyaCreateInvoiceSuccessResponse = {

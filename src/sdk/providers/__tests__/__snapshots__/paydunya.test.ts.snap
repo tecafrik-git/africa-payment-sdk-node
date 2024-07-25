@@ -299,7 +299,7 @@ exports[`makes a payout to the provided customer 1`] = `
   "post": [
     {
       "baseURL": "https://app.paydunya.com/api/",
-      "data": "{"account_alias":"781234567","amount":150,"withdraw_mode":"wave-senegal"}",
+      "data": "{"account_alias":"781234567","amount":150,"disburse_id":"transactionId","withdraw_mode":"wave-senegal","callback_url":"https://example.com/callback"}",
       "env": {
         "Blob": [Function],
         "FormData": [Function],

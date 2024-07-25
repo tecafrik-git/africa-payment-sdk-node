@@ -37,6 +37,7 @@ beforeEach(() => {
       name: "store-name",
     },
     token: "token",
+    callbackUrl: "https://example.com/callback",
   });
 });
 
