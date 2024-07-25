@@ -46,10 +46,10 @@ afterEach(() => {
 
 test("calls wave API and returns a checkout result on success", async () => {
   mockApi
-    .onPost("/checkout-invoice/create")
+    .onPost("/v1/checkout-invoice/create")
     .replyOnce(200, createInvoiceSuccessResponse);
   mockApi
-    .onPost("/softpay/wave-senegal")
+    .onPost("/v1/softpay/wave-senegal")
     .replyOnce(200, wavePaymentSuccessResponse);
   const checkoutResult = await paydunyaPaymentProvider.checkoutMobileMoney({
     amount: 100,
@@ -77,10 +77,10 @@ test("calls wave API and returns a checkout result on success", async () => {
 
 test("calls orange money API and returns a checkout result on success", async () => {
   mockApi
-    .onPost("/checkout-invoice/create")
+    .onPost("/v1/checkout-invoice/create")
     .replyOnce(200, createInvoiceSuccessResponse);
   mockApi
-    .onPost("/softpay/orange-money-senegal")
+    .onPost("/v1/softpay/orange-money-senegal")
     .replyOnce(200, orangeMoneySuccessResponse);
   const checkoutResult = await paydunyaPaymentProvider.checkoutMobileMoney({
     amount: 100,
@@ -109,7 +109,7 @@ test("calls orange money API and returns a checkout result on success", async ()
 
 test("calls paydunya cc API and returns a checkout result on success", async () => {
   mockApi
-    .onPost("/checkout-invoice/create")
+    .onPost("/v1/checkout-invoice/create")
     .replyOnce(200, creditCardInvoiceSuccessResponse);
   const checkoutResult = await paydunyaPaymentProvider.checkoutCreditCard({
     amount: 100,
@@ -145,10 +145,10 @@ test("emits a payment initiated event when given an event emitter", async () => 
   };
   paydunyaPaymentProvider.useEventEmitter(eventEmitter as any);
   mockApi
-    .onPost("/checkout-invoice/create")
+    .onPost("/v1/checkout-invoice/create")
     .replyOnce(200, createInvoiceSuccessResponse);
   mockApi
-    .onPost("/softpay/wave-senegal")
+    .onPost("/v1/softpay/wave-senegal")
     .replyOnce(200, wavePaymentSuccessResponse);
   await paydunyaPaymentProvider.checkoutMobileMoney({
     amount: 100,
@@ -192,14 +192,14 @@ test("throws unsupported payment method error when using checkout redirect", asy
 
 test("refunds a wave transaction properly", async () => {
   mockApi
-    .onGet(/\/checkout-invoice\/confirm\/.+/)
+    .onGet(/\/v1\/checkout-invoice\/confirm\/.+/)
     .reply(200, getWaveInvoiceSuccessResponse);
   mockApi
-    .onPost("/disburse/get-invoice")
+    .onPost("/v2/disburse/get-invoice")
     .reply(200, createDisburseInvoiceSuccessResponse);
 
   mockApi
-    .onPost("/disburse/submit-invoice")
+    .onPost("/v2/disburse/submit-invoice")
     .reply(200, submitDisburseInvoiceSuccessResponse);
 
   const refundResult = await paydunyaPaymentProvider.refund({
@@ -213,10 +213,10 @@ test("refunds a wave transaction properly", async () => {
 
 test("makes a payout to the provided customer", async () => {
   mockApi
-    .onPost("/disburse/get-invoice")
+    .onPost("/v2/disburse/get-invoice")
     .reply(200, createDisburseInvoiceSuccessResponse);
   mockApi
-    .onPost("/disburse/submit-invoice")
+    .onPost("/v2/disburse/submit-invoice")
     .reply(200, submitDisburseInvoiceSuccessResponse);
 
   const payoutResult = await paydunyaPaymentProvider.payoutMobileMoney({

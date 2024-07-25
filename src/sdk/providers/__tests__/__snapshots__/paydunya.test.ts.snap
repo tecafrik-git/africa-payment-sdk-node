@@ -11,7 +11,7 @@ exports[`calls orange money API and returns a checkout result on success 1`] = `
   "patch": [],
   "post": [
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"invoice":{"total_amount":100,"description":"description"},"store":{"name":"store-name"},"channels":null,"custom_data":{"transaction_id":"transactionId","text_meta":"value","number_meta":1,"boolean_meta":true},"actions":{"cancel_url":"https://example.com/failure","return_url":"https://example.com/success"}}",
       "env": {
         "Blob": [Function],
@@ -40,13 +40,13 @@ exports[`calls orange money API and returns a checkout result on success 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "checkout-invoice/create",
+      "url": "v1/checkout-invoice/create",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
     },
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"customer_name":"Mamadou Diallo","customer_email":"+221781234567@yopmail.com","phone_number":"781234567","authorization_code":"12345","invoice_token":"token"}",
       "env": {
         "Blob": [Function],
@@ -75,7 +75,7 @@ exports[`calls orange money API and returns a checkout result on success 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "/softpay/orange-money-senegal",
+      "url": "/v1/softpay/orange-money-senegal",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
@@ -108,7 +108,7 @@ exports[`calls paydunya cc API and returns a checkout result on success 1`] = `
   "patch": [],
   "post": [
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"invoice":{"total_amount":100,"description":"description"},"store":{"name":"store-name"},"channels":["card"],"custom_data":{"transaction_id":"transactionId","text_meta":"value","number_meta":1,"boolean_meta":true},"actions":{"cancel_url":"https://example.com/failure","return_url":"https://example.com/success"}}",
       "env": {
         "Blob": [Function],
@@ -137,7 +137,7 @@ exports[`calls paydunya cc API and returns a checkout result on success 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "checkout-invoice/create",
+      "url": "v1/checkout-invoice/create",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
@@ -170,7 +170,7 @@ exports[`calls wave API and returns a checkout result on success 1`] = `
   "patch": [],
   "post": [
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"invoice":{"total_amount":100,"description":"description"},"store":{"name":"store-name"},"channels":null,"custom_data":{"transaction_id":"transactionId","text_meta":"value","number_meta":1,"boolean_meta":true},"actions":{"cancel_url":"https://example.com/failure","return_url":"https://example.com/success"}}",
       "env": {
         "Blob": [Function],
@@ -199,13 +199,13 @@ exports[`calls wave API and returns a checkout result on success 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "checkout-invoice/create",
+      "url": "v1/checkout-invoice/create",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
     },
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"wave_senegal_fullName":"Mamadou Diallo","wave_senegal_email":"+221781234567@yopmail.com","wave_senegal_phone":"781234567","wave_senegal_payment_token":"token"}",
       "env": {
         "Blob": [Function],
@@ -234,7 +234,7 @@ exports[`calls wave API and returns a checkout result on success 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "/softpay/wave-senegal",
+      "url": "/v1/softpay/wave-senegal",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
@@ -298,7 +298,7 @@ exports[`makes a payout to the provided customer 1`] = `
   "patch": [],
   "post": [
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"account_alias":"781234567","amount":150,"withdraw_mode":"wave-senegal"}",
       "env": {
         "Blob": [Function],
@@ -327,13 +327,13 @@ exports[`makes a payout to the provided customer 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "/disburse/get-invoice",
+      "url": "/v2/disburse/get-invoice",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
     },
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"disburse_invoice":"disburse_token","disburse_id":"transactionId"}",
       "env": {
         "Blob": [Function],
@@ -362,7 +362,7 @@ exports[`makes a payout to the provided customer 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "/disburse/submit-invoice",
+      "url": "/v2/disburse/submit-invoice",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
@@ -388,7 +388,7 @@ exports[`refunds a wave transaction properly 1`] = `
   "delete": [],
   "get": [
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": undefined,
       "env": {
         "Blob": [Function],
@@ -418,7 +418,7 @@ exports[`refunds a wave transaction properly 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "/checkout-invoice/confirm/wave-transaction-reference",
+      "url": "/v1/checkout-invoice/confirm/wave-transaction-reference",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
@@ -431,7 +431,7 @@ exports[`refunds a wave transaction properly 1`] = `
   "patch": [],
   "post": [
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"account_alias":"+221781234567","amount":100,"withdraw_mode":"wave-senegal"}",
       "env": {
         "Blob": [Function],
@@ -460,13 +460,13 @@ exports[`refunds a wave transaction properly 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "/disburse/get-invoice",
+      "url": "/v2/disburse/get-invoice",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",
     },
     {
-      "baseURL": "https://app.paydunya.com/api/v1/",
+      "baseURL": "https://app.paydunya.com/api/",
       "data": "{"disburse_invoice":"disburse_token","disburse_id":"transactionId"}",
       "env": {
         "Blob": [Function],
@@ -495,7 +495,7 @@ exports[`refunds a wave transaction properly 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "/disburse/submit-invoice",
+      "url": "/v2/disburse/submit-invoice",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",

@@ -35,8 +35,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     this.api = create({
       baseURL:
         config.mode === "test"
-          ? "https://app.sandbox.paydunya.com/api/v1/"
-          : "https://app.paydunya.com/api/v1/",
+          ? "https://app.sandbox.paydunya.com/api/"
+          : "https://app.paydunya.com/api/",
       headers: {
         "Content-Type": "application/json",
         "PAYDUNYA-MASTER-KEY": config.masterKey,
@@ -102,7 +102,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     const createInvoiceResponse = await this.api.post<
       PaydunyaCreateInvoiceSuccessResponse,
       PaydunyaCreateInvoiceErrorResponse
-    >("checkout-invoice/create", {
+    >("v1/checkout-invoice/create", {
       invoice: {
         total_amount: options.amount,
         description: options.description,
@@ -170,7 +170,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         const paydunyaWaveResponse = await this.api.post<
           PaydunyaWavePaymentSuccessResponse,
           PaydunyaWavePaymentErrorResponse
-        >("/softpay/wave-senegal", {
+        >("/v1/softpay/wave-senegal", {
           wave_senegal_fullName: `${options.customer.firstName || ""} ${
             options.customer.lastName || ""
           }`.trim(),
@@ -201,7 +201,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         const paydunyaOrangeMoneyResponse = await this.api.post<
           PaydunyaOrangeMoneyPaymentSuccessResponse,
           PaydunyaOrangeMoneyPaymentErrorResponse
-        >("/softpay/orange-money-senegal", {
+        >("/v1/softpay/orange-money-senegal", {
           customer_name: `${options.customer.firstName || ""} ${
             options.customer.lastName || ""
           }`.trim(),
@@ -294,7 +294,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     const getInvoiceResponse = await this.api.get<
       PaydunyaGetInvoiceSuccessResponse,
       PaydunyaGetInvoiceErrorResponse
-    >(`/checkout-invoice/confirm/${transactionReference}`);
+    >(`/v1/checkout-invoice/confirm/${transactionReference}`);
 
     if (!getInvoiceResponse.data) {
       throw new PaymentError("Paydunya error: " + getInvoiceResponse.problem);
@@ -319,7 +319,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     const createDisburseInvoiceResponse = await this.api.post<
       PaydunyaCreateDisburseInvoiceSuccessResponse,
       PaydunyaCreateDisburseInvoiceErrorResponse
-    >("/disburse/get-invoice", {
+    >("/v2/disburse/get-invoice", {
       account_alias: getInvoiceResponse.data.customer.phone,
       amount: amountToRefund,
       withdraw_mode: getInvoiceResponse.data.customer.payment_method.replace(
@@ -350,7 +350,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     const submitDisburseInvoiceResponse = await this.api.post<
       PaydunyaSubmitDisburseInvoiceSuccessResponse,
       PaydunyaSubmitDisburseInvoiceErrorResponse
-    >("/disburse/submit-invoice", {
+    >("/v2/disburse/submit-invoice", {
       disburse_invoice: createDisburseInvoiceResponse.data.disburse_token,
       disburse_id: options.transactionId,
     });
@@ -407,7 +407,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     const createDisburseInvoiceResponse = await this.api.post<
       PaydunyaCreateDisburseInvoiceSuccessResponse,
       PaydunyaCreateDisburseInvoiceErrorResponse
-    >("/disburse/get-invoice", {
+    >("/v2/disburse/get-invoice", {
       account_alias: parsedRecipientPhoneNumber.nationalNumber,
       amount: options.amount,
       withdraw_mode: paymentMethodToWithdrawMode[options.paymentMethod],
@@ -435,7 +435,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     const submitDisburseInvoiceResponse = await this.api.post<
       PaydunyaSubmitDisburseInvoiceSuccessResponse,
       PaydunyaSubmitDisburseInvoiceErrorResponse
-    >("/disburse/submit-invoice", {
+    >("/v2/disburse/submit-invoice", {
       disburse_invoice: createDisburseInvoiceResponse.data.disburse_token,
       disburse_id: options.transactionId,
     });
