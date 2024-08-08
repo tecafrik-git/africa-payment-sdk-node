@@ -432,7 +432,7 @@ exports[`refunds a wave transaction properly 1`] = `
   "post": [
     {
       "baseURL": "https://app.paydunya.com/api/",
-      "data": "{"account_alias":"+221781234567","amount":100,"withdraw_mode":"wave-senegal"}",
+      "data": "{"account_alias":"+221781234567","amount":100,"withdraw_mode":"wave-senegal","disburse_id":"transactionId","callback_url":"https://example.com/callback"}",
       "env": {
         "Blob": [Function],
         "FormData": [Function],
