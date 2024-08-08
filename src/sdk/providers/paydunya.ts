@@ -326,6 +326,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         /_/g,
         "-"
       ),
+      disburse_id: options.transactionId,
+      callback_url: this.config.callbackUrl,
     });
 
     if (!createDisburseInvoiceResponse.data) {
