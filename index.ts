@@ -4,7 +4,12 @@ import StripePaymentProvider from "./src/sdk/providers/stripe";
 import BogusPaymentProvider from "./src/sdk/providers/bogus";
 
 export default AfricaPaymentsProvider;
-export { PaydunyaPaymentProvider, StripePaymentProvider, BogusPaymentProvider };
+export {
+  AfricaPaymentsProvider,
+  PaydunyaPaymentProvider,
+  StripePaymentProvider,
+  BogusPaymentProvider,
+};
 
 export * from "./src/sdk/payment-provider.interface";
 export * from "./src/sdk/providers/paydunya";
