@@ -1,4 +1,5 @@
 import EventEmitter2 from "eventemitter2";
+import { PaymentEvent, PaymentSuccessfulEvent } from "./payment-events";
 
 interface PaymentProvider {
   checkoutMobileMoney(
@@ -11,9 +12,7 @@ interface PaymentProvider {
 
   checkoutRedirect(options: RedirectCheckoutOptions): Promise<CheckoutResult>;
 
-  payoutMobileMoney(
-    options: MobileMoneyPayoutOptions
-  ): Promise<PayoutResult>;
+  payoutMobileMoney(options: MobileMoneyPayoutOptions): Promise<PayoutResult>;
 
   refund(options: RefundOptions): Promise<RefundResult>;
 
@@ -22,7 +21,7 @@ interface PaymentProvider {
   handleWebhook(
     body: Buffer | string | Record<string, unknown>,
     options?: HandleWebhookOptions
-  ): Promise<void>;
+  ): Promise<PaymentEvent | null>;
 }
 
 enum PaymentMethod {
@@ -132,7 +131,7 @@ type PayoutResult = {
   transactionStatus: TransactionStatus;
   transactionAmount: number;
   transactionCurrency: Currency;
-}
+};
 
 type HandleWebhookOptions = {
   headers?: Record<string, string>;

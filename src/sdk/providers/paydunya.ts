@@ -467,21 +467,21 @@ class PaydunyaPaymentProvider implements PaymentProvider {
 
   async handleWebhook(
     rawBody: Buffer | string | Record<string, unknown>
-  ): Promise<void> {
+  ) {
     if (isBuffer(rawBody) || isString(rawBody)) {
       console.error(
         "Paydunya webhook body must be a parsed object, not the raw body"
       );
-      return;
+      return null;
     }
     const body = rawBody as PaydunyaPaymentWebhookBody;
     if (!body.hash) {
       console.error("Missing hash in Paydunya webhook body");
-      return;
+      return null;
     }
     if (body.hash !== this.masterKeySha512Hash) {
       console.error("Invalid hash in Paydunya webhook body");
-      return;
+      return null;
     }
     const paymentMethod =
       body.customer.payment_method === "wave_senegal"
@@ -504,6 +504,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         PaymentEventType.PAYMENT_SUCCESSFUL,
         paymentSuccessfulEvent
       );
+      return paymentSuccessfulEvent;
     } else if (body.status === "cancelled") {
       const paymentCancelledEvent: PaymentCancelledEvent = {
         type: PaymentEventType.PAYMENT_CANCELLED,
@@ -520,6 +521,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         PaymentEventType.PAYMENT_CANCELLED,
         paymentCancelledEvent
       );
+      return paymentCancelledEvent;
     } else if (body.status === "failed") {
       const paymentFailedEvent: PaymentFailedEvent = {
         type: PaymentEventType.PAYMENT_FAILED,
@@ -536,7 +538,9 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         PaymentEventType.PAYMENT_FAILED,
         paymentFailedEvent
       );
+      return paymentFailedEvent;
     }
+    return null;
   }
 }
 

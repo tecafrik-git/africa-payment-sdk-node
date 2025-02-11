@@ -170,15 +170,15 @@ class StripePaymentProvider implements PaymentProvider {
   async handleWebhook(
     rawBody: Buffer | string,
     options: HandleWebhookOptions
-  ): Promise<void> {
+  ) {
     const signature = options.headers?.["stripe-signature"];
     if (!signature) {
       console.warn("No signature found in stripe webhook request");
-      return;
+      return null;
     }
     if (!this.webhookSecret) {
       console.warn("No stripe webhook secret found");
-      return;
+      return null;
     }
     let event: Stripe.Event;
     try {
@@ -189,13 +189,13 @@ class StripePaymentProvider implements PaymentProvider {
       );
     } catch (error) {
       console.warn("Error verifying stripe webhook signature", error);
-      return;
+      return null;
     }
 
     const emitSuccessfulPayment = (session: Stripe.Checkout.Session) => {
       if (!session.metadata?.transactionId) {
         console.warn("No transaction ID found in stripe webhook");
-        return;
+        return null;
       }
       const paymentSuccessfulEvent: PaymentSuccessfulEvent = {
         type: PaymentEventType.PAYMENT_SUCCESSFUL,
@@ -211,6 +211,7 @@ class StripePaymentProvider implements PaymentProvider {
         PaymentEventType.PAYMENT_SUCCESSFUL,
         paymentSuccessfulEvent
       );
+      return paymentSuccessfulEvent;
     };
 
     const parseMetadata = (
@@ -230,7 +231,7 @@ class StripePaymentProvider implements PaymentProvider {
 
       if (!session.metadata?.transactionId) {
         console.warn("No transaction ID found in stripe webhook");
-        return;
+        return null;
       }
 
       const paymentInitiatedEvent: PaymentInitiatedEvent = {
@@ -249,16 +250,17 @@ class StripePaymentProvider implements PaymentProvider {
       );
 
       if (session.payment_status === "paid") {
-        emitSuccessfulPayment(session);
+        return emitSuccessfulPayment(session);
       }
+      return paymentInitiatedEvent;
     } else if (event.type === "checkout.session.async_payment_succeeded") {
       const session = event.data.object as Stripe.Checkout.Session;
-      emitSuccessfulPayment(session);
+      return emitSuccessfulPayment(session);
     } else if (event.type === "checkout.session.async_payment_failed") {
       const session = event.data.object as Stripe.Checkout.Session;
       if (!session.metadata?.transactionId) {
         console.warn("No transaction ID found in stripe webhook");
-        return;
+        return null;
       }
       const paymentFailedEvent: PaymentFailedEvent = {
         type: PaymentEventType.PAYMENT_FAILED,
@@ -275,7 +277,9 @@ class StripePaymentProvider implements PaymentProvider {
         PaymentEventType.PAYMENT_FAILED,
         paymentFailedEvent
       );
+      return paymentFailedEvent;
     }
+    return null;
   }
 }
 

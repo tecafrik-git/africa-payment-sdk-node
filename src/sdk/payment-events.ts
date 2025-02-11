@@ -53,3 +53,5 @@ export type PaymentCancelledEvent = {
   reason: string;
   paymentProvider: string;
 };
+
+export type PaymentEvent = PaymentInitiatedEvent | PaymentSuccessfulEvent | PaymentFailedEvent | PaymentCancelledEvent;

@@ -128,7 +128,7 @@ class BogusPaymentProvider implements PaymentProvider {
   async handleWebhook(
     rawBody: Buffer | string,
     options: HandleWebhookOptions
-  ): Promise<void> {
+  ) {
     const body = JSON.parse(
       rawBody.toString()
     ) as BogusPaymentProviderWebhookBody;
@@ -136,7 +136,7 @@ class BogusPaymentProvider implements PaymentProvider {
     const eventType = isFailure
       ? PaymentEventType.PAYMENT_FAILED
       : PaymentEventType.PAYMENT_SUCCESSFUL;
-    this.eventEmitter?.emit(eventType, {
+    const event = {
       type: eventType,
       transactionAmount: body.amount,
       transactionCurrency: body.currency,
@@ -145,7 +145,9 @@ class BogusPaymentProvider implements PaymentProvider {
       paymentMethod: body.paymentMethod,
       metadata: body.metadata,
       paymentProvider: BogusPaymentProvider.name,
-    } as PaymentSuccessfulEvent | PaymentFailedEvent);
+    } as PaymentSuccessfulEvent | PaymentFailedEvent
+    this.eventEmitter?.emit(eventType, event);
+    return event;
   }
 
   payoutMobileMoney(options: MobileMoneyPayoutOptions): Promise<PayoutResult> {
