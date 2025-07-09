@@ -18,6 +18,12 @@ import EventEmitter2 from "eventemitter2";
 import { PaymentError, PaymentErrorType } from "../payment-error";
 import { isObject, pick } from "lodash";
 
+export enum TaarihTransactionStatus {
+  PENDING = "PENDING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED"
+}
+
 class TaarihPaymentProvider implements PaymentProvider {
   private api: ApisauceInstance;
   private eventEmitter?: EventEmitter2;
@@ -316,7 +322,7 @@ class TaarihPaymentProvider implements PaymentProvider {
       }
 
       const status = data.status;
-      if (status !== "PENDING") {
+      if (status !== TaarihTransactionStatus.PENDING) {
         return pick(data, [
           "status",
           "amount",
