@@ -71,7 +71,7 @@ class TaarihPaymentProvider implements PaymentProvider {
       case PaymentMethod.WAVE:
         return "WAVE_TO_ACCOUNT";
       case PaymentMethod.ORANGE_MONEY:
-        return "ORANGE_MONEY_TO_ACCOUNT";
+        return "OM_TO_ACCOUNT";
       case PaymentMethod.CREDIT_CARD:
         return "CARD_TO_ACCOUNT";
       default:
