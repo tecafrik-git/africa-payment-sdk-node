@@ -22,6 +22,17 @@ interface PaymentProvider {
     body: Buffer | string | Record<string, unknown>,
     options?: HandleWebhookOptions
   ): Promise<PaymentEvent | null>;
+
+  callback?(
+    internalId: string,
+    timeInterval?: number,
+    maxAttempts?: number
+  ): Promise<
+    Pick<
+      TaarihTransactionStatusSuccessResponse,
+      "status" | "amount" | "currency" | "bankAccountSender"
+    >
+  >;
 }
 
 enum PaymentMethod {
@@ -138,6 +149,51 @@ type HandleWebhookOptions = {
   providerName?: string;
 };
 
+type CallbackOptions = {
+  internalId: string;
+  timeInterval?: number;
+  maxAttempts?: number;
+};
+
+type TaarihTransactionStatusSuccessResponse = {
+  status: string;
+  amount: number;
+  currency: string;
+  bankAccountSender: string | null;
+  bankAccount: {
+    id: number;
+    refId: string;
+    commercial_name: string;
+    technical_name: string;
+    type: string;
+    mainAccountNumber: string;
+    subAccountNumber: (
+      | {
+          subAccountNumber: string;
+          financialSubAccount: string;
+        }
+      | {
+          subAccountNumber: string;
+          financialSubAccount: string;
+        }[]
+    )[];
+    externalId: string | null;
+    lettrable: any | null;
+    rules: any | null;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
+    accountOwnerId: number | null;
+    legalEntityOwnerId: number;
+    technicalAccountType: string;
+    balance: number;
+    attributions: any[];
+    partnerAccountNumber: string | null;
+    financialProductId: number;
+    status: string;
+  };
+};
+
 export {
   PaymentProvider,
   PaymentMethod,
@@ -156,4 +212,6 @@ export {
   HandleWebhookOptions,
   MobileMoneyPayoutOptions,
   PayoutResult,
+  CallbackOptions,
+  TaarihTransactionStatusSuccessResponse,
 };

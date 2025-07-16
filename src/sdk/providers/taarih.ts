@@ -12,6 +12,7 @@ import {
   MobileMoneyPayoutOptions,
   PayoutResult,
   RedirectCheckoutOptions,
+  TaarihTransactionStatusSuccessResponse,
 } from "../payment-provider.interface";
 import { ApisauceInstance, create } from "apisauce";
 import EventEmitter2 from "eventemitter2";
@@ -418,45 +419,6 @@ export type TaarihPaymentWebhookBody = {
   receipt_identifier: string;
   receipt_url: string;
   provider_reference: string;
-};
-
-export type TaarihTransactionStatusSuccessResponse = {
-  status: string;
-  amount: number;
-  currency: string;
-  bankAccountSender: string | null;
-  bankAccount: {
-    id: number;
-    refId: string;
-    commercial_name: string;
-    technical_name: string;
-    type: string;
-    mainAccountNumber: string;
-    subAccountNumber: (
-      | {
-          subAccountNumber: string;
-          financialSubAccount: string;
-        }
-      | {
-          subAccountNumber: string;
-          financialSubAccount: string;
-        }[]
-    )[];
-    externalId: string | null;
-    lettrable: any | null;
-    rules: any | null;
-    active: boolean;
-    createdAt: string;
-    updatedAt: string;
-    accountOwnerId: number | null;
-    legalEntityOwnerId: number;
-    technicalAccountType: string;
-    balance: number;
-    attributions: any[];
-    partnerAccountNumber: string | null;
-    financialProductId: number;
-    status: string;
-  };
 };
 
 export default TaarihPaymentProvider;
