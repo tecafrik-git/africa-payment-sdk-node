@@ -37,6 +37,23 @@ export const orangeMoneySuccessResponse: PaydunyaOrangeMoneyPaymentSuccessRespon
     success: true,
   };
 
+export const orangeMoneyQrCodeSuccessResponseWithUrl: PaydunyaOrangeMoneyPaymentSuccessResponse =
+  {
+    currency: "XOF",
+    fees: 0,
+    message: "success",
+    success: true,
+    url: "https://qr.paydunya.com/checkout?token=qr-token-123",
+  };
+
+export const orangeMoneyQrCodeSuccessResponseWithoutUrl: PaydunyaOrangeMoneyPaymentSuccessResponse =
+  {
+    currency: "XOF",
+    fees: 0,
+    message: "success",
+    success: true,
+  };
+
 export const getWaveInvoiceSuccessResponse: PaydunyaGetInvoiceSuccessResponse = {
   actions: {
     cancel_url: "https://example.com/cancel",

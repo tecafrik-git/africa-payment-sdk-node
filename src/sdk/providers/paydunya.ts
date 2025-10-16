@@ -1,4 +1,4 @@
-import { parsePhoneNumber } from "libphonenumber-js";
+import { parsePhoneNumber, PhoneNumber } from "libphonenumber-js";
 import {
   MobileMoneyCheckoutOptions,
   CheckoutResult,
@@ -12,6 +12,7 @@ import {
   MobileMoneyPayoutOptions,
   PayoutResult,
   RedirectCheckoutOptions,
+  OrangeMoneyCheckoutOptions,
 } from "../payment-provider.interface";
 import { ApisauceInstance, create } from "apisauce";
 import EventEmitter2 from "eventemitter2";
@@ -48,7 +49,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
 
     this.api.addResponseTransform((response) => {
       if (
-        response.config?.url?.endsWith("/softpay/orange-money-senegal") &&
+        response.config?.url?.endsWith("/softpay/new-orange-money-senegal") &&
         response.status === 422 &&
         response.data?.message === "Invalid or expired OTP code!"
       ) {
@@ -71,8 +72,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
             ? "message" in response.data
               ? String(response.data.message)
               : "response_text" in response.data
-              ? String(response.data.response_text)
-              : defaultErrorMessage
+                ? String(response.data.response_text)
+                : defaultErrorMessage
             : defaultErrorMessage
         );
       }
@@ -85,6 +86,41 @@ class PaydunyaPaymentProvider implements PaymentProvider {
 
   useEventEmitter(eventEmitter: EventEmitter2) {
     this.eventEmitter = eventEmitter;
+  }
+
+  private determineOrangeMoneyApiType(
+    options: OrangeMoneyCheckoutOptions
+  ): PaydunyaOrangeMoneyApiType {
+    return options.authorizationCode ? "OTPCODE" : "QRCODE";
+  }
+
+  private buildOrangeMoneyRequest(
+    options: OrangeMoneyCheckoutOptions,
+    invoiceToken: string,
+    parsedPhoneNumber: PhoneNumber
+  ): PaydunyaOrangeMoneyRequest {
+    const apiType = this.determineOrangeMoneyApiType(options);
+    const basePayload = {
+      customer_name: `${options.customer.firstName || ""} ${options.customer.lastName || ""
+        }`.trim(),
+      customer_email: `${options.customer.phoneNumber}@yopmail.com`,
+      phone_number: parsedPhoneNumber.nationalNumber,
+      invoice_token: invoiceToken,
+      api_type: apiType,
+    };
+
+    if (apiType === "OTPCODE") {
+      return {
+        ...basePayload,
+        authorization_code: options.authorizationCode!,
+        api_type: "OTPCODE",
+      };
+    }
+
+    return {
+      ...basePayload,
+      api_type: "QRCODE",
+    };
   }
 
   async checkout(
@@ -137,7 +173,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     if (!("token" in invoiceData)) {
       throw new PaymentError(
         "Missing invoice token in Paydunya response: " +
-          invoiceData.response_text
+        invoiceData.response_text
       );
     }
 
@@ -171,9 +207,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
           PaydunyaWavePaymentSuccessResponse,
           PaydunyaWavePaymentErrorResponse
         >("/v1/softpay/wave-senegal", {
-          wave_senegal_fullName: `${options.customer.firstName || ""} ${
-            options.customer.lastName || ""
-          }`.trim(),
+          wave_senegal_fullName: `${options.customer.firstName || ""} ${options.customer.lastName || ""
+            }`.trim(),
           wave_senegal_email: `${options.customer.phoneNumber}@yopmail.com`,
           wave_senegal_phone: parsedCustomerPhoneNumber.nationalNumber,
           wave_senegal_payment_token: invoiceToken,
@@ -198,18 +233,16 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         }
         paydunyaPaymentResponse = waveData;
       } else if (options.paymentMethod === PaymentMethod.ORANGE_MONEY) {
+        const requestPayload = this.buildOrangeMoneyRequest(
+          options,
+          invoiceToken,
+          parsedCustomerPhoneNumber
+        );
+
         const paydunyaOrangeMoneyResponse = await this.api.post<
           PaydunyaOrangeMoneyPaymentSuccessResponse,
           PaydunyaOrangeMoneyPaymentErrorResponse
-        >("/v1/softpay/orange-money-senegal", {
-          customer_name: `${options.customer.firstName || ""} ${
-            options.customer.lastName || ""
-          }`.trim(),
-          customer_email: `${options.customer.phoneNumber}@yopmail.com`,
-          phone_number: parsedCustomerPhoneNumber.nationalNumber,
-          authorization_code: options.authorizationCode,
-          invoice_token: invoiceToken,
-        });
+        >("/v1/softpay/new-orange-money-senegal", requestPayload);
 
         const orangeMoneyData = paydunyaOrangeMoneyResponse.data;
 
@@ -237,8 +270,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       options.paymentMethod === PaymentMethod.CREDIT_CARD
         ? invoiceData.response_text
         : paydunyaPaymentResponse && "url" in paydunyaPaymentResponse
-        ? paydunyaPaymentResponse.url
-        : undefined;
+          ? paydunyaPaymentResponse.url
+          : undefined;
 
     const result: CheckoutResult = {
       transactionAmount: options.amount,
@@ -309,7 +342,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     if (!("invoice" in getInvoiceResponse.data)) {
       throw new PaymentError(
         "Missing invoice in Paydunya response: " +
-          getInvoiceResponse.data.response_text
+        getInvoiceResponse.data.response_text
       );
     }
 
@@ -345,7 +378,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     if (!("disburse_token" in createDisburseInvoiceResponse.data)) {
       throw new PaymentError(
         "Missing disburse token in Paydunya response: " +
-          createDisburseInvoiceResponse.data.response_text
+        createDisburseInvoiceResponse.data.response_text
       );
     }
 
@@ -432,7 +465,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     if (!("disburse_token" in createDisburseInvoiceResponse.data)) {
       throw new PaymentError(
         "Missing disburse token in Paydunya response: " +
-          createDisburseInvoiceResponse.data.response_text
+        createDisburseInvoiceResponse.data.response_text
       );
     }
 
@@ -487,8 +520,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       body.customer.payment_method === "wave_senegal"
         ? PaymentMethod.WAVE
         : body.customer.payment_method === "orange_money_senegal"
-        ? PaymentMethod.ORANGE_MONEY
-        : null;
+          ? PaymentMethod.ORANGE_MONEY
+          : null;
     if (body.status === "completed" && body.response_code == "00") {
       const paymentSuccessfulEvent: PaymentSuccessfulEvent = {
         type: PaymentEventType.PAYMENT_SUCCESSFUL,
@@ -579,11 +612,35 @@ export type PaydunyaWavePaymentErrorResponse = {
   message: string;
 };
 
+export type PaydunyaOrangeMoneyApiType = "OTPCODE" | "QRCODE";
+
+export type PaydunyaOrangeMoneyCodeOtpRequest = {
+  customer_name: string;
+  customer_email: string;
+  phone_number: string;
+  authorization_code: string;
+  invoice_token: string;
+  api_type: "OTPCODE";
+};
+
+export type PaydunyaOrangeMoneyQrCodeRequest = {
+  customer_name: string;
+  customer_email: string;
+  phone_number: string;
+  invoice_token: string;
+  api_type: "QRCODE";
+};
+
+export type PaydunyaOrangeMoneyRequest =
+  | PaydunyaOrangeMoneyCodeOtpRequest
+  | PaydunyaOrangeMoneyQrCodeRequest;
+
 export type PaydunyaOrangeMoneyPaymentSuccessResponse = {
   success: true;
   message: string;
-  fees: number;
-  currency: string;
+  fees?: number;
+  currency?: string;
+  url?: string;
 };
 
 export type PaydunyaOrangeMoneyPaymentErrorResponse = {

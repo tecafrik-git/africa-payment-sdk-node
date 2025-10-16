@@ -61,7 +61,7 @@ type WaveCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
 
 type OrangeMoneyCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
   paymentMethod: PaymentMethod.ORANGE_MONEY;
-  authorizationCode: string;
+  authorizationCode?: string;
 };
 
 type CreditCardCheckoutOptions = BasicCheckoutOptions & {
