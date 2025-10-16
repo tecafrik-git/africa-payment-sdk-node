@@ -47,7 +47,7 @@ exports[`calls orange money API and returns a checkout result on success 1`] = `
     },
     {
       "baseURL": "https://app.paydunya.com/api/",
-      "data": "{"customer_name":"Mamadou Diallo","customer_email":"+221781234567@yopmail.com","phone_number":"781234567","authorization_code":"12345","invoice_token":"token"}",
+      "data": "{"customer_name":"Mamadou Diallo","customer_email":"+221781234567@yopmail.com","phone_number":"781234567","invoice_token":"token","api_type":"OTPCODE","authorization_code":"12345"}",
       "env": {
         "Blob": [Function],
         "FormData": [Function],
@@ -75,7 +75,7 @@ exports[`calls orange money API and returns a checkout result on success 1`] = `
         "forcedJSONParsing": true,
         "silentJSONParsing": true,
       },
-      "url": "/v1/softpay/orange-money-senegal",
+      "url": "/v1/softpay/new-orange-money-senegal",
       "validateStatus": [Function],
       "xsrfCookieName": "XSRF-TOKEN",
       "xsrfHeaderName": "X-XSRF-TOKEN",

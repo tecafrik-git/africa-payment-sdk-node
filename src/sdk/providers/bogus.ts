@@ -94,7 +94,7 @@ class BogusPaymentProvider implements PaymentProvider {
     if (options.paymentMethod === PaymentMethod.WAVE) {
       isFailure = options.customer.phoneNumber.endsWith("13");
     } else if (options.paymentMethod === PaymentMethod.ORANGE_MONEY) {
-      isFailure = options.authorizationCode.endsWith("13");
+      isFailure = options.authorizationCode?.endsWith("13") || false;
     }
 
     return this.checkout(options, isFailure);
