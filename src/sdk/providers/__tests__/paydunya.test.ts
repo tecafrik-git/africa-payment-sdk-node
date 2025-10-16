@@ -429,7 +429,7 @@ describe("Orange Money QR code payment flow", () => {
       description: "QR code payment test",
       paymentMethod: PaymentMethod.ORANGE_MONEY,
       transactionId: "test-txn-qr-001",
-      // No authorizationCode - triggers QR_CODE flow
+      // No authorizationCode - triggers QRCODE flow
     });
 
     expect(checkoutResult.redirectUrl).toBe(
@@ -460,7 +460,7 @@ describe("Orange Money QR code payment flow", () => {
       description: "QR code payment without URL",
       paymentMethod: PaymentMethod.ORANGE_MONEY,
       transactionId: "test-txn-qr-002",
-      // No authorizationCode - triggers QR_CODE flow
+      // No authorizationCode - triggers QRCODE flow
     });
 
     expect(checkoutResult.redirectUrl).toBeUndefined();
@@ -493,7 +493,7 @@ describe("Orange Money QR code payment flow", () => {
         description: "QR code payment error test",
         paymentMethod: PaymentMethod.ORANGE_MONEY,
         transactionId: "test-txn-qr-error",
-        // No authorizationCode - triggers QR_CODE flow
+        // No authorizationCode - triggers QRCODE flow
       })
     ).rejects.toThrow("Payment processing failed");
   });
