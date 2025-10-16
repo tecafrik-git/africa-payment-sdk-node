@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design document outlines the implementation approach for updating the Paydunya payment provider to support the new Orange Money Senegal API endpoint with both `CODE_OTP` and `QR_CODE` payment flows. The solution maintains backward compatibility while adding new capabilities through intelligent flow detection based on the presence of an authorization code.
+This design document outlines the implementation approach for updating the Paydunya payment provider to support the new Orange Money Senegal API endpoint with both `OTPCODE` and `QRCODE` payment flows. The solution maintains backward compatibility while adding new capabilities through intelligent flow detection based on the presence of an authorization code.
 
 ### Key Design Decisions
 
@@ -30,7 +30,7 @@ This design document outlines the implementation approach for updating the Paydu
        │               │
        ▼               ▼
 ┌─────────────┐  ┌─────────────┐
-│ CODE_OTP    │  │  QR_CODE    │
+│ OTPCODE    │  │  QRCODE    │
 │ Flow        │  │  Flow       │
 └──────┬──────┘  └──────┬──────┘
        │                │
@@ -88,7 +88,7 @@ type OrangeMoneyCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
 #### New API Request Types
 
 ```typescript
-type PaydunyaOrangeMoneyApiType = "CODE_OTP" | "QR_CODE";
+type PaydunyaOrangeMoneyApiType = "OTPCODE" | "QRCODE";
 
 type PaydunyaOrangeMoneyCodeOtpRequest = {
   customer_name: string;
@@ -96,7 +96,7 @@ type PaydunyaOrangeMoneyCodeOtpRequest = {
   phone_number: string;
   authorization_code: string;
   invoice_token: string;
-  api_type: "CODE_OTP";
+  api_type: "OTPCODE";
 };
 
 type PaydunyaOrangeMoneyQrCodeRequest = {
@@ -104,7 +104,7 @@ type PaydunyaOrangeMoneyQrCodeRequest = {
   customer_email: string;
   phone_number: string;
   invoice_token: string;
-  api_type: "QR_CODE";
+  api_type: "QRCODE";
 };
 
 type PaydunyaOrangeMoneyRequest =
@@ -114,7 +114,7 @@ type PaydunyaOrangeMoneyRequest =
 
 #### Response Types
 
-Based on the documentation, both flows return similar success responses. We'll verify if the QR_CODE flow returns a `url` field like Wave does:
+Based on the documentation, both flows return similar success responses. We'll verify if the QRCODE flow returns a `url` field like Wave does:
 
 ```typescript
 type PaydunyaOrangeMoneyPaymentSuccessResponse = {
@@ -122,7 +122,7 @@ type PaydunyaOrangeMoneyPaymentSuccessResponse = {
   message: string;
   fees?: number;
   currency?: string;
-  url?: string; // May be present for QR_CODE flow
+  url?: string; // May be present for QRCODE flow
 };
 
 type PaydunyaOrangeMoneyPaymentErrorResponse = {
@@ -147,7 +147,7 @@ The `checkout()` method in `PaydunyaPaymentProvider` will be updated to:
 private determineOrangeMoneyApiType(
   options: OrangeMoneyCheckoutOptions
 ): PaydunyaOrangeMoneyApiType {
-  return options.authorizationCode ? "CODE_OTP" : "QR_CODE";
+  return options.authorizationCode ? "OTPCODE" : "QRCODE";
 }
 ```
 
@@ -170,17 +170,17 @@ private buildOrangeMoneyRequest(
     api_type: apiType,
   };
 
-  if (apiType === "CODE_OTP") {
+  if (apiType === "OTPCODE") {
     return {
       ...basePayload,
       authorization_code: options.authorizationCode!,
-      api_type: "CODE_OTP",
+      api_type: "OTPCODE",
     };
   }
 
   return {
     ...basePayload,
-    api_type: "QR_CODE",
+    api_type: "QRCODE",
   };
 }
 ```
@@ -211,7 +211,7 @@ this.api.addResponseTransform((response) => {
 
 To ensure backward compatibility:
 
-1. **Existing Code**: Applications currently passing `authorizationCode` will continue to work without changes, using the `CODE_OTP` flow
+1. **Existing Code**: Applications currently passing `authorizationCode` will continue to work without changes, using the `OTPCODE` flow
 2. **Type Safety**: TypeScript will not break existing code since we're making `authorizationCode` optional (less restrictive)
 3. **Runtime Behavior**: The flow selection logic ensures the correct API call is made based on the provided options
 
@@ -235,8 +235,8 @@ PaydunyaOrangeMoneyRequest {
   customer_email: string,
   phone_number: string,
   invoice_token: string,
-  api_type: "CODE_OTP" | "QR_CODE",
-  authorization_code?: string,  // Only for CODE_OTP
+  api_type: "OTPCODE" | "QRCODE",
+  authorization_code?: string,  // Only for OTPCODE
 }
 
 // Output to application
@@ -246,7 +246,7 @@ CheckoutResult {
   transactionStatus: TransactionStatus.PENDING,
   transactionAmount: number,
   transactionCurrency: Currency.XOF,
-  redirectUrl?: string,  // May be present for QR_CODE flow
+  redirectUrl?: string,  // May be present for QRCODE flow
 }
 ```
 
@@ -254,7 +254,7 @@ CheckoutResult {
 
 ### Error Scenarios
 
-1. **Invalid Authorization Code (CODE_OTP flow)**
+1. **Invalid Authorization Code (OTPCODE flow)**
    - HTTP Status: 422
    - Message: "Invalid or expired OTP code!"
    - Error Type: `PaymentErrorType.INVALID_AUTHORIZATION_CODE`
@@ -281,20 +281,20 @@ CheckoutResult {
 ### Unit Tests
 
 1. **Flow Detection Tests**
-   - Test that `CODE_OTP` is selected when `authorizationCode` is provided
-   - Test that `QR_CODE` is selected when `authorizationCode` is undefined
-   - Test that `QR_CODE` is selected when `authorizationCode` is empty string
+   - Test that `OTPCODE` is selected when `authorizationCode` is provided
+   - Test that `QRCODE` is selected when `authorizationCode` is undefined
+   - Test that `QRCODE` is selected when `authorizationCode` is empty string
 
 2. **Request Payload Tests**
-   - Verify `CODE_OTP` request includes `authorization_code` field
-   - Verify `QR_CODE` request excludes `authorization_code` field
+   - Verify `OTPCODE` request includes `authorization_code` field
+   - Verify `QRCODE` request excludes `authorization_code` field
    - Verify both requests include correct `api_type` value
    - Verify common fields are present in both request types
 
 3. **Response Handling Tests**
-   - Test successful `CODE_OTP` payment response
-   - Test successful `QR_CODE` payment response with URL
-   - Test successful `QR_CODE` payment response without URL
+   - Test successful `OTPCODE` payment response
+   - Test successful `QRCODE` payment response with URL
+   - Test successful `QRCODE` payment response without URL
    - Test error responses for both flows
 
 4. **Error Handling Tests**
@@ -309,8 +309,8 @@ CheckoutResult {
 ### Integration Tests
 
 1. **End-to-End Flow Tests**
-   - Test complete `CODE_OTP` payment flow from checkout to webhook
-   - Test complete `QR_CODE` payment flow from checkout to webhook
+   - Test complete `OTPCODE` payment flow from checkout to webhook
+   - Test complete `QRCODE` payment flow from checkout to webhook
    - Verify event emissions for both flows
 
 2. **API Integration Tests**
@@ -320,7 +320,7 @@ CheckoutResult {
 ### Test Data
 
 ```typescript
-// CODE_OTP test case
+// OTPCODE test case
 const codeOtpOptions: OrangeMoneyCheckoutOptions = {
   paymentMethod: PaymentMethod.ORANGE_MONEY,
   authorizationCode: "123456",
@@ -334,7 +334,7 @@ const codeOtpOptions: OrangeMoneyCheckoutOptions = {
   },
 };
 
-// QR_CODE test case
+// QRCODE test case
 const qrCodeOptions: OrangeMoneyCheckoutOptions = {
   paymentMethod: PaymentMethod.ORANGE_MONEY,
   // authorizationCode not provided
