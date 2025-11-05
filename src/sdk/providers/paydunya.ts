@@ -508,10 +508,12 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       return null;
     }
     const body = rawBody as PaydunyaPaymentWebhookBody;
+
     if (!body.hash) {
       console.error("Missing hash in Paydunya webhook body");
       return null;
     }
+
     if (body.hash !== this.masterKeySha512Hash) {
       console.error("Invalid hash in Paydunya webhook body");
       return null;
@@ -522,6 +524,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
         : body.customer.payment_method === "orange_money_senegal"
           ? PaymentMethod.ORANGE_MONEY
           : null;
+
     if (body.status === "completed" && body.response_code == "00") {
       const paymentSuccessfulEvent: PaymentSuccessfulEvent = {
         type: PaymentEventType.PAYMENT_SUCCESSFUL,
