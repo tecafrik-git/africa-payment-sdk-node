@@ -16,12 +16,17 @@ import {
 import { ApisauceInstance, create } from "apisauce";
 import EventEmitter2 from "eventemitter2";
 import { PaymentError, PaymentErrorType } from "../payment-error";
-import { isObject, pick } from "lodash";
+import { isBuffer, isObject, isString, pick } from "lodash";
+import {
+  PaymentEventType,
+  PaymentFailedEvent,
+  PaymentSuccessfulEvent,
+} from "../payment-events";
 
 export enum TaarihTransactionStatus {
   PENDING = "PENDING",
   COMPLETED = "COMPLETED",
-  FAILED = "FAILED"
+  FAILED = "FAILED",
 }
 
 class TaarihPaymentProvider implements PaymentProvider {
@@ -283,7 +288,55 @@ class TaarihPaymentProvider implements PaymentProvider {
   }
 
   async handleWebhook(rawBody: Buffer | string | Record<string, unknown>) {
-    return null;
+    if (isBuffer(rawBody) || isString(rawBody)) {
+      console.error(
+        "Paydunya webhook body must be a parsed object, not the raw body"
+      );
+      return null;
+    }
+    const body = rawBody as TaarihPaymentWebhookBody;
+
+    const taarihTransactionStatusResponse = await this.callback(
+      body.transactionId,
+      body.timeInterval || 5000,
+      body.maxAttempts || 20
+    );
+
+    if (
+      taarihTransactionStatusResponse.status ===
+      TaarihTransactionStatus.COMPLETED
+    ) {
+      const paymentSuccessfulEvent: PaymentSuccessfulEvent = {
+        type: PaymentEventType.PAYMENT_SUCCESSFUL,
+        paymentMethod: "" as PaymentMethod,
+        transactionAmount: taarihTransactionStatusResponse.amount,
+        transactionCurrency: Currency.XOF,
+        transactionId: body.transactionId,
+        transactionReference: body.transactionId,
+        paymentProvider: TaarihPaymentProvider.name,
+      };
+      this.eventEmitter?.emit(
+        PaymentEventType.PAYMENT_SUCCESSFUL,
+        paymentSuccessfulEvent
+      );
+      return paymentSuccessfulEvent;
+    }
+
+    const paymentFailedEvent: PaymentFailedEvent = {
+      type: PaymentEventType.PAYMENT_FAILED,
+      paymentMethod: "" as PaymentMethod,
+      transactionAmount: taarihTransactionStatusResponse.amount,
+      transactionCurrency: Currency.XOF,
+      transactionId: body.transactionId,
+      transactionReference: body.transactionId,
+      reason: "Payment failed",
+      paymentProvider: TaarihPaymentProvider.name,
+    };
+    this.eventEmitter?.emit(
+      PaymentEventType.PAYMENT_FAILED,
+      paymentFailedEvent
+    );
+    return paymentFailedEvent;
   }
 
   async callback(
@@ -307,6 +360,7 @@ class TaarihPaymentProvider implements PaymentProvider {
           },
         }
       );
+
       if (
         taarihTransactionStatusResponse.data &&
         "invalidData" in taarihTransactionStatusResponse.data
@@ -397,27 +451,9 @@ export type TaarihCheckoutPreAuthSuccessResponse = {
 };
 
 export type TaarihPaymentWebhookBody = {
-  response_code: string;
-  response_text: string;
-  hash: string;
-  custom_data: Record<string, any>;
-  actions: {
-    cancel_url: string;
-    callback_url: string;
-    return_url: string;
-  };
-  mode: string;
-  status: string;
-  fail_reason: string;
-  customer: {
-    name: string;
-    phone: string;
-    email: string;
-    payment_method: string;
-  };
-  receipt_identifier: string;
-  receipt_url: string;
-  provider_reference: string;
+  transactionId: string;
+  maxAttempts: number;
+  timeInterval: number;
 };
 
 export type TaarihTransactionStatusSuccessResponse = {

@@ -1,6 +1,6 @@
 {
   "name": "@tecafrik/africa-payment-sdk",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "A single SDK to integrate all african payment providers seamlessly",
   "main": "dist/index.js",
   "scripts": {
