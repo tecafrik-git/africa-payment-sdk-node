@@ -72,8 +72,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
             ? "message" in response.data
               ? String(response.data.message)
               : "response_text" in response.data
-                ? String(response.data.response_text)
-                : defaultErrorMessage
+              ? String(response.data.response_text)
+              : defaultErrorMessage
             : defaultErrorMessage
         );
       }
@@ -101,8 +101,9 @@ class PaydunyaPaymentProvider implements PaymentProvider {
   ): PaydunyaOrangeMoneyRequest {
     const apiType = this.determineOrangeMoneyApiType(options);
     const basePayload = {
-      customer_name: `${options.customer.firstName || ""} ${options.customer.lastName || ""
-        }`.trim(),
+      customer_name: `${options.customer.firstName || ""} ${
+        options.customer.lastName || ""
+      }`.trim(),
       customer_email: `${options.customer.phoneNumber}@yopmail.com`,
       phone_number: parsedPhoneNumber.nationalNumber,
       invoice_token: invoiceToken,
@@ -173,7 +174,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     if (!("token" in invoiceData)) {
       throw new PaymentError(
         "Missing invoice token in Paydunya response: " +
-        invoiceData.response_text
+          invoiceData.response_text
       );
     }
 
@@ -207,8 +208,9 @@ class PaydunyaPaymentProvider implements PaymentProvider {
           PaydunyaWavePaymentSuccessResponse,
           PaydunyaWavePaymentErrorResponse
         >("/v1/softpay/wave-senegal", {
-          wave_senegal_fullName: `${options.customer.firstName || ""} ${options.customer.lastName || ""
-            }`.trim(),
+          wave_senegal_fullName: `${options.customer.firstName || ""} ${
+            options.customer.lastName || ""
+          }`.trim(),
           wave_senegal_email: `${options.customer.phoneNumber}@yopmail.com`,
           wave_senegal_phone: parsedCustomerPhoneNumber.nationalNumber,
           wave_senegal_payment_token: invoiceToken,
@@ -266,12 +268,20 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       throw new PaymentError("Paydunya error: no payment response data");
     }
 
-    const redirectUrl =
-      options.paymentMethod === PaymentMethod.CREDIT_CARD
-        ? invoiceData.response_text
-        : paydunyaPaymentResponse && "url" in paydunyaPaymentResponse
-          ? paydunyaPaymentResponse.url
-          : undefined;
+    let redirectUrl = undefined;
+
+    if (options.paymentMethod === PaymentMethod.CREDIT_CARD) {
+      redirectUrl = invoiceData.response_text;
+    } else if (
+      paydunyaPaymentResponse &&
+      "other_url" in paydunyaPaymentResponse &&
+      paydunyaPaymentResponse.other_url &&
+      "maxit_url" in paydunyaPaymentResponse.other_url
+    ) {
+      redirectUrl = paydunyaPaymentResponse.other_url.maxit_url;
+    } else if (paydunyaPaymentResponse && "url" in paydunyaPaymentResponse) {
+      redirectUrl = paydunyaPaymentResponse.url;
+    }
 
     const result: CheckoutResult = {
       transactionAmount: options.amount,
@@ -342,7 +352,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     if (!("invoice" in getInvoiceResponse.data)) {
       throw new PaymentError(
         "Missing invoice in Paydunya response: " +
-        getInvoiceResponse.data.response_text
+          getInvoiceResponse.data.response_text
       );
     }
 
@@ -378,7 +388,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     if (!("disburse_token" in createDisburseInvoiceResponse.data)) {
       throw new PaymentError(
         "Missing disburse token in Paydunya response: " +
-        createDisburseInvoiceResponse.data.response_text
+          createDisburseInvoiceResponse.data.response_text
       );
     }
 
@@ -465,7 +475,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     if (!("disburse_token" in createDisburseInvoiceResponse.data)) {
       throw new PaymentError(
         "Missing disburse token in Paydunya response: " +
-        createDisburseInvoiceResponse.data.response_text
+          createDisburseInvoiceResponse.data.response_text
       );
     }
 
@@ -498,9 +508,7 @@ class PaydunyaPaymentProvider implements PaymentProvider {
     };
   }
 
-  async handleWebhook(
-    rawBody: Buffer | string | Record<string, unknown>
-  ) {
+  async handleWebhook(rawBody: Buffer | string | Record<string, unknown>) {
     if (isBuffer(rawBody) || isString(rawBody)) {
       console.error(
         "Paydunya webhook body must be a parsed object, not the raw body"
@@ -522,8 +530,8 @@ class PaydunyaPaymentProvider implements PaymentProvider {
       body.customer.payment_method === "wave_senegal"
         ? PaymentMethod.WAVE
         : body.customer.payment_method === "orange_money_senegal"
-          ? PaymentMethod.ORANGE_MONEY
-          : null;
+        ? PaymentMethod.ORANGE_MONEY
+        : null;
 
     if (body.status === "completed" && body.response_code == "00") {
       const paymentSuccessfulEvent: PaymentSuccessfulEvent = {
@@ -644,6 +652,10 @@ export type PaydunyaOrangeMoneyPaymentSuccessResponse = {
   fees?: number;
   currency?: string;
   url?: string;
+  other_url?: {
+    om_url?: string;
+    maxit_url?: string;
+  };
 };
 
 export type PaydunyaOrangeMoneyPaymentErrorResponse = {
