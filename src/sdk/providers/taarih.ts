@@ -74,11 +74,11 @@ class TaarihPaymentProvider implements PaymentProvider {
   private getTaarihPaymentMethod(paymentMethod: PaymentMethod) {
     switch (paymentMethod) {
       case PaymentMethod.WAVE:
-        return "WAVE_TO_ACCOUNT";
+        return "WAVE";
       case PaymentMethod.ORANGE_MONEY:
-        return "OM_TO_ACCOUNT";
+        return "OM";
       case PaymentMethod.CREDIT_CARD:
-        return "CARD_TO_ACCOUNT";
+        return "CINETPAY";
       default:
         throw new PaymentError("Invalid payment method: " + paymentMethod);
     }
@@ -119,45 +119,6 @@ class TaarihPaymentProvider implements PaymentProvider {
     throw new PaymentError("Taarih error: No token in response");
   }
 
-  async checkoutPreAuth(
-    options: MobileMoneyCheckoutOptions,
-    token: string,
-    bankAccountId: number
-  ) {
-    const taarihCheckoutResponse = await this.api.post<
-      TaarihCheckoutPreAuthSuccessResponse,
-      TaarihApiErrorResponse
-    >(
-      "/transaction/preauth-external-to-account",
-      {
-        bankAccountId: bankAccountId,
-        amount: options.amount,
-        callingCode: this.config.callingCode,
-        phoneNumber: options.customer.phoneNumber,
-        paymentMethod: this.getTaarihPaymentMethod(options.paymentMethod),
-        currency: options.currency,
-      },
-      {
-        headers: {
-          ...this.api.headers,
-          "x-access-token": token,
-        },
-      }
-    );
-
-    if (!taarihCheckoutResponse) {
-      throw new PaymentError("Taarih error: no payment response data");
-    }
-
-    if (
-      taarihCheckoutResponse.data &&
-      "amount" in taarihCheckoutResponse.data
-    ) {
-      return taarihCheckoutResponse.data;
-    }
-    throw new PaymentError("Taarih error: response data is not valid");
-  }
-
   async checkout(
     options: MobileMoneyCheckoutOptions | CreditCardCheckoutOptions
   ): Promise<CheckoutResult> {
@@ -179,21 +140,22 @@ class TaarihPaymentProvider implements PaymentProvider {
       options.paymentMethod === PaymentMethod.ORANGE_MONEY;
 
     const user = await this.login();
-    const bankAccountId = user.userBankAccounts[0].id;
-
-    await this.checkoutPreAuth(options, user.token, bankAccountId);
+    const companyId = user.legalEntityId;
 
     const taarihCheckoutResponse = await this.api.post<
       TaarihCheckoutSuccessResponse,
       TaarihApiErrorResponse
     >(
-      "/transaction/external-to-account",
+      "/transaction/pos-payment",
       {
-        bankAccountId: bankAccountId,
+        companyId,
         amount: options.amount,
-        callingCode: this.config.callingCode,
-        phoneNumber: options.customer.phoneNumber,
+        countryCode: this.config.callingCode,
+        mobileNumber: options.customer.phoneNumber,
         paymentMethod: this.getTaarihPaymentMethod(options.paymentMethod),
+        operationCode: "PAY_WITH_WAVE",
+        firstName: options.customer.firstName,
+        lastName: options.customer.lastName,
         currency: options.currency,
       },
       {
