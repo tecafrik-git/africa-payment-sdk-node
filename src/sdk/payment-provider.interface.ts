@@ -57,10 +57,12 @@ type BasicMobileMoneyCheckoutOptions = BasicCheckoutOptions & {
 
 type WaveCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
   paymentMethod: PaymentMethod.WAVE;
+  operationCode?: "PAY_WITH_WAVE" | "WAVE_TO_ACCOUNT";
 };
 
 type OrangeMoneyCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
   paymentMethod: PaymentMethod.ORANGE_MONEY;
+  operationCode?: "PAY_WITH_OM" | "OM_TO_ACCOUNT";
   authorizationCode?: string;
 };
 
