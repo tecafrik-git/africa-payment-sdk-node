@@ -7,6 +7,7 @@ import {
   PaymentSuccessfulEvent,
 } from "./payment-events";
 import {
+  CallbackOptions,
   CreditCardCheckoutOptions,
   HandleWebhookOptions,
   MobileMoneyCheckoutOptions,
@@ -73,7 +74,8 @@ class AfricaPaymentsProvider extends EventEmitter2 {
   async refund(options: RefundOptions) {
     const providerToUse = this.providers.find(
       (provider) =>
-        !options.providerName || provider.constructor.name === options.providerName
+        !options.providerName ||
+        provider.constructor.name === options.providerName
     );
     if (!providerToUse) {
       throw new PaymentError(
@@ -100,6 +102,16 @@ class AfricaPaymentsProvider extends EventEmitter2 {
       );
     }
     return providerToUse.handleWebhook(requestBody, options);
+  }
+
+  async callback(
+    internalId: string,
+    timeInterval: number = 3000,
+    maxAttempts: number = 4
+  ) {
+    return this.tryEachProvider((provider) =>
+      provider.callback?.(internalId, timeInterval, maxAttempts)
+    );
   }
 
   on(
