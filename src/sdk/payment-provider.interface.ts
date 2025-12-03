@@ -68,10 +68,14 @@ type OrangeMoneyCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
 
 type CreditCardCheckoutOptions = BasicCheckoutOptions & {
   paymentMethod: PaymentMethod.CREDIT_CARD;
-  cardNumber: string;
-  cardExpirationMonth: string;
-  cardExpirationYear: string;
-  cardCvv: string;
+  operationCode?: "CINETPAY" | "STRIPE";
+  customer: BasicCheckoutOptions["customer"] & {
+    phoneNumber?: string;
+  };
+  cardNumber?: string;
+  cardExpirationMonth?: string;
+  cardExpirationYear?: string;
+  cardCvv?: string;
 };
 
 type RedirectCheckoutOptions = BasicCheckoutOptions & {

@@ -1,4 +1,8 @@
-import { Currency, PaymentMethod, TransactionStatus } from "../../payment-provider.interface";
+import {
+  Currency,
+  PaymentMethod,
+  TransactionStatus,
+} from "../../payment-provider.interface";
 import {
   createDisburseInvoiceSuccessResponse,
   createInvoiceSuccessResponse,
@@ -125,10 +129,6 @@ test("calls paydunya cc API and returns a checkout result on success", async () 
     description: "description",
     paymentMethod: PaymentMethod.CREDIT_CARD,
     transactionId: "transactionId",
-    cardNumber: "4242424242424242",
-    cardExpirationMonth: "12",
-    cardExpirationYear: "2025",
-    cardCvv: "123",
     successRedirectUrl: "https://example.com/success",
     failureRedirectUrl: "https://example.com/failure",
     metadata: {
@@ -474,12 +474,10 @@ describe("Orange Money QR code payment flow", () => {
     mockApi
       .onPost("/v1/checkout-invoice/create")
       .replyOnce(200, createInvoiceSuccessResponse);
-    mockApi
-      .onPost("/v1/softpay/new-orange-money-senegal")
-      .replyOnce(500, {
-        success: false,
-        message: "Payment processing failed",
-      });
+    mockApi.onPost("/v1/softpay/new-orange-money-senegal").replyOnce(500, {
+      success: false,
+      message: "Payment processing failed",
+    });
 
     await expect(
       paydunyaPaymentProvider.checkoutMobileMoney({
@@ -524,7 +522,7 @@ describe("Orange Money QR code payment flow", () => {
     expect(checkoutResult.redirectUrl).toBe(
       "https://qr.paydunya.com/checkout?token=qr-token-123"
     );
-    
+
     // Verify all other required fields are present
     expect(checkoutResult).toHaveProperty("transactionId");
     expect(checkoutResult).toHaveProperty("transactionReference");
@@ -615,7 +613,7 @@ describe("Backward compatibility", () => {
     expect(checkoutResult.transactionStatus).toBe(TransactionStatus.PENDING);
     expect(checkoutResult.transactionAmount).toBe(5000);
     expect(checkoutResult.transactionCurrency).toBe(Currency.XOF);
-    
+
     // OTPCODE flow should not have redirectUrl
     expect(checkoutResult.redirectUrl).toBeUndefined();
   });
@@ -624,12 +622,10 @@ describe("Backward compatibility", () => {
     mockApi
       .onPost("/v1/checkout-invoice/create")
       .replyOnce(200, createInvoiceSuccessResponse);
-    mockApi
-      .onPost("/v1/softpay/new-orange-money-senegal")
-      .replyOnce(422, {
-        success: false,
-        message: "Invalid or expired OTP code!",
-      });
+    mockApi.onPost("/v1/softpay/new-orange-money-senegal").replyOnce(422, {
+      success: false,
+      message: "Invalid or expired OTP code!",
+    });
 
     await expect(
       paydunyaPaymentProvider.checkoutMobileMoney({
@@ -652,12 +648,10 @@ describe("Backward compatibility", () => {
     mockApi
       .onPost("/v1/checkout-invoice/create")
       .replyOnce(200, createInvoiceSuccessResponse);
-    mockApi
-      .onPost("/v1/softpay/new-orange-money-senegal")
-      .replyOnce(500, {
-        success: false,
-        message: "Internal server error",
-      });
+    mockApi.onPost("/v1/softpay/new-orange-money-senegal").replyOnce(500, {
+      success: false,
+      message: "Internal server error",
+    });
 
     await expect(
       paydunyaPaymentProvider.checkoutMobileMoney({

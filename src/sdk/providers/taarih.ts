@@ -78,7 +78,8 @@ class TaarihPaymentProvider implements PaymentProvider {
       case PaymentMethod.ORANGE_MONEY:
         return "OM";
       case PaymentMethod.CREDIT_CARD:
-        return "CINETPAY";
+        // value will be provided via operationCode for Taarih
+        return null;
       default:
         throw new PaymentError("Invalid payment method: " + paymentMethod);
     }
@@ -137,13 +138,6 @@ class TaarihPaymentProvider implements PaymentProvider {
       );
     }
 
-    if (options.paymentMethod === PaymentMethod.CREDIT_CARD) {
-      throw new PaymentError(
-        "Taarih does not support credit card checkout",
-        PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
-      );
-    }
-
     if (options.currency !== Currency.XOF) {
       throw new PaymentError(
         "Taarih does not support the currency: " + options.currency,
@@ -167,7 +161,9 @@ class TaarihPaymentProvider implements PaymentProvider {
         amount: options.amount,
         countryCode: this.config.callingCode,
         mobileNumber: options.customer.phoneNumber,
-        paymentMethod: this.getTaarihPaymentMethod(options.paymentMethod),
+        paymentMethod:
+          this.getTaarihPaymentMethod(options.paymentMethod) ||
+          options.operationCode,
         operationCode,
         firstName: options.customer.firstName,
         lastName: options.customer.lastName,
@@ -233,10 +229,7 @@ class TaarihPaymentProvider implements PaymentProvider {
   async checkoutCreditCard(
     options: CreditCardCheckoutOptions
   ): Promise<CheckoutResult> {
-    throw new PaymentError(
-      "Taarih does not support credit card checkout",
-      PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
-    );
+    return this.checkout(options);
   }
 
   async checkoutRedirect(

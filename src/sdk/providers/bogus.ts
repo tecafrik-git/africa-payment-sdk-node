@@ -103,7 +103,7 @@ class BogusPaymentProvider implements PaymentProvider {
   async checkoutCreditCard(
     options: CreditCardCheckoutOptions
   ): Promise<CheckoutResult> {
-    const isFailure = options.cardNumber.endsWith("13");
+    const isFailure = options.cardNumber?.endsWith("13") || false;
     return this.checkout(options, isFailure);
   }
 
@@ -125,10 +125,7 @@ class BogusPaymentProvider implements PaymentProvider {
     };
   }
 
-  async handleWebhook(
-    rawBody: Buffer | string,
-    options: HandleWebhookOptions
-  ) {
+  async handleWebhook(rawBody: Buffer | string, options: HandleWebhookOptions) {
     const body = JSON.parse(
       rawBody.toString()
     ) as BogusPaymentProviderWebhookBody;
@@ -145,7 +142,7 @@ class BogusPaymentProvider implements PaymentProvider {
       paymentMethod: body.paymentMethod,
       metadata: body.metadata,
       paymentProvider: BogusPaymentProvider.name,
-    } as PaymentSuccessfulEvent | PaymentFailedEvent
+    } as PaymentSuccessfulEvent | PaymentFailedEvent;
     this.eventEmitter?.emit(eventType, event);
     return event;
   }
