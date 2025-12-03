@@ -122,6 +122,21 @@ class TaarihPaymentProvider implements PaymentProvider {
   async checkout(
     options: MobileMoneyCheckoutOptions | CreditCardCheckoutOptions
   ): Promise<CheckoutResult> {
+    let operationCode: string = "";
+    if (!("operationCode" in options)) {
+      operationCode =
+        options.paymentMethod === PaymentMethod.WAVE
+          ? "PAY_WITH_WAVE"
+          : "PAY_WITH_OM";
+    } else if ("operationCode" in options && options.operationCode) {
+      operationCode = options.operationCode;
+    } else {
+      throw new PaymentError(
+        "Taarih error: operation code is required",
+        PaymentErrorType.INVALID_OPERATION_CODE
+      );
+    }
+
     if (options.paymentMethod === PaymentMethod.CREDIT_CARD) {
       throw new PaymentError(
         "Taarih does not support credit card checkout",
@@ -153,7 +168,7 @@ class TaarihPaymentProvider implements PaymentProvider {
         countryCode: this.config.callingCode,
         mobileNumber: options.customer.phoneNumber,
         paymentMethod: this.getTaarihPaymentMethod(options.paymentMethod),
-        operationCode: "PAY_WITH_WAVE",
+        operationCode,
         firstName: options.customer.firstName,
         lastName: options.customer.lastName,
         currency: options.currency,
