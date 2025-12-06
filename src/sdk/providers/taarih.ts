@@ -29,6 +29,11 @@ export enum TaarihTransactionStatus {
   FAILED = "FAILED",
 }
 
+enum TaarihCreditCardPaymentProcessor {
+  CINETPAY = "CINETPAY",
+  STRIPE = "STRIPE",
+}
+
 class TaarihPaymentProvider implements PaymentProvider {
   private api: ApisauceInstance;
   private eventEmitter?: EventEmitter2;
@@ -71,15 +76,17 @@ class TaarihPaymentProvider implements PaymentProvider {
     this.eventEmitter = eventEmitter;
   }
 
-  private getTaarihPaymentMethod(paymentMethod: PaymentMethod) {
+  private getTaarihPaymentMethod(
+    paymentMethod: PaymentMethod,
+    processor?: TaarihCreditCardPaymentProcessor
+  ) {
     switch (paymentMethod) {
       case PaymentMethod.WAVE:
         return "WAVE";
       case PaymentMethod.ORANGE_MONEY:
         return "OM";
       case PaymentMethod.CREDIT_CARD:
-        // value will be provided via operationCode for Taarih
-        return null;
+        return processor;
       default:
         throw new PaymentError("Invalid payment method: " + paymentMethod);
     }
@@ -148,10 +155,13 @@ class TaarihPaymentProvider implements PaymentProvider {
       options.paymentMethod === PaymentMethod.WAVE ||
       options.paymentMethod === PaymentMethod.ORANGE_MONEY;
 
+    const isCreditCard = options.paymentMethod === PaymentMethod.CREDIT_CARD;
+
     const user = await this.login();
     const companyId = user.legalEntityId;
 
-    const taarihCheckoutResponse = await this.api.post<
+    let taarihCheckoutResponse;
+    taarihCheckoutResponse = await this.api.post<
       TaarihCheckoutSuccessResponse,
       TaarihApiErrorResponse
     >(
@@ -161,9 +171,10 @@ class TaarihPaymentProvider implements PaymentProvider {
         amount: options.amount,
         countryCode: this.config.callingCode,
         mobileNumber: options.customer.phoneNumber,
-        paymentMethod:
-          this.getTaarihPaymentMethod(options.paymentMethod) ||
-          options.operationCode,
+        paymentMethod: this.getTaarihPaymentMethod(
+          options.paymentMethod,
+          options.metadata?.processor as TaarihCreditCardPaymentProcessor
+        ),
         operationCode,
         firstName: options.customer.firstName,
         lastName: options.customer.lastName,
@@ -198,6 +209,12 @@ class TaarihPaymentProvider implements PaymentProvider {
 
     if (!taarihCheckoutResponse) {
       throw new PaymentError("Taarih error: no payment response data");
+    }
+
+    if (isCreditCard) {
+      taarihCheckoutResponse.data = (
+        taarihCheckoutResponse.data as unknown as TaarihCreditCardCheckoutSuccessResponse
+      ).results?.[0];
     }
 
     if (
@@ -411,6 +428,10 @@ export type TaarihCheckoutSuccessResponse = {
   externalId: string;
   payment_link: string;
   internalId: string;
+};
+
+export type TaarihCreditCardCheckoutSuccessResponse = {
+  results?: TaarihCheckoutSuccessResponse[];
 };
 
 export type TaarihCheckoutPreAuthSuccessResponse = {
