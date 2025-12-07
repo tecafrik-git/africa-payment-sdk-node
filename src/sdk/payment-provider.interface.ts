@@ -68,7 +68,6 @@ type OrangeMoneyCheckoutOptions = BasicMobileMoneyCheckoutOptions & {
 
 type CreditCardCheckoutOptions = BasicCheckoutOptions & {
   paymentMethod: PaymentMethod.CREDIT_CARD;
-  metadata?: Record<string, unknown>;
   customer: BasicCheckoutOptions["customer"] & {
     phoneNumber?: string;
   };

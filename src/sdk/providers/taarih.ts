@@ -86,6 +86,15 @@ class TaarihPaymentProvider implements PaymentProvider {
       case PaymentMethod.ORANGE_MONEY:
         return "OM";
       case PaymentMethod.CREDIT_CARD:
+        if (
+          !processor ||
+          !Object.values(TaarihCreditCardPaymentProcessor).includes(processor)
+        ) {
+          throw new PaymentError(
+            "Taarih error: Invalid or missing credit card processor",
+            PaymentErrorType.UNSUPPORTED_PAYMENT_METHOD
+          );
+        }
         return processor;
       default:
         throw new PaymentError("Invalid payment method: " + paymentMethod);
