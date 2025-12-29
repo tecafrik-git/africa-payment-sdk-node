@@ -43,7 +43,7 @@ class TaarihPaymentProvider implements PaymentProvider {
       baseURL:
         config.mode === "test"
           ? "https://api-dev.taarih.com/api"
-          : "https://api-prod.taarih.com/api",
+          : "https://api.taarih.com/api",
       headers: {
         "Content-Type": "application/json",
       },
@@ -235,8 +235,8 @@ class TaarihPaymentProvider implements PaymentProvider {
       const result: CheckoutResult = {
         transactionAmount: options.amount,
         transactionCurrency: options.currency,
-        transactionId: taarihCheckoutResponse.data.externalId,
-        transactionReference: taarihCheckoutResponse.data.internalId,
+        transactionId: taarihCheckoutResponse.data.internalId,
+        transactionReference: taarihCheckoutResponse.data.externalId,
         transactionStatus: TransactionStatus.PENDING,
         redirectUrl: taarihCheckoutResponse.data.payment_link,
       };
