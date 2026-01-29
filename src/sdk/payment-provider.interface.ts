@@ -39,6 +39,8 @@ type BasicCheckoutOptions = {
   description: string;
   currency: Currency;
   transactionId: string;
+  accountNumber: string;
+  employeeId: string;
   customer: {
     firstName: string;
     lastName: string;

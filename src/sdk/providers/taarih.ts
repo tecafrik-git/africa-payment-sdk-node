@@ -64,8 +64,8 @@ class TaarihPaymentProvider implements PaymentProvider {
             ? "message" in response.data
               ? String(response.data.message)
               : "response_text" in response.data
-              ? String(response.data.response_text)
-              : defaultErrorMessage
+                ? String(response.data.response_text)
+                : defaultErrorMessage
             : defaultErrorMessage
         );
       }
@@ -122,9 +122,9 @@ class TaarihPaymentProvider implements PaymentProvider {
     if (signEndUserResponse.data && "invalidData" in signEndUserResponse.data) {
       throw new PaymentError(
         "Taarih error: " +
-        signEndUserResponse.data.message +
-        " " +
-        signEndUserResponse.data.invalidData
+          signEndUserResponse.data.message +
+          " " +
+          signEndUserResponse.data.invalidData
           ? JSON.stringify(signEndUserResponse.data.invalidData)
           : ""
       );
@@ -188,6 +188,9 @@ class TaarihPaymentProvider implements PaymentProvider {
         firstName: options.customer.firstName,
         lastName: options.customer.lastName,
         currency: options.currency,
+        externalTransactionId: options.transactionId,
+        accountNumber: options.accountNumber || "",
+        employeeId: options.employeeId || ""
       },
       {
         headers: {
@@ -470,13 +473,13 @@ export type TaarihTransactionStatusSuccessResponse = {
     mainAccountNumber: string;
     subAccountNumber: (
       | {
-          subAccountNumber: string;
-          financialSubAccount: string;
-        }
+        subAccountNumber: string;
+        financialSubAccount: string;
+      }
       | {
-          subAccountNumber: string;
-          financialSubAccount: string;
-        }[]
+        subAccountNumber: string;
+        financialSubAccount: string;
+      }[]
     )[];
     externalId: string | null;
     lettrable: any | null;
