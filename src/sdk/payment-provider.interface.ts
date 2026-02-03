@@ -40,7 +40,7 @@ type BasicCheckoutOptions = {
   currency: Currency;
   transactionId: string;
   accountNumber?: string;
-  employeeId?: string;
+  employeeId?: number | null;
   customer: {
     firstName: string;
     lastName: string;

@@ -190,7 +190,7 @@ class TaarihPaymentProvider implements PaymentProvider {
         currency: options.currency,
         externalTransactionId: options.transactionId,
         accountNumber: options.accountNumber || "",
-        employeeId: options.employeeId || ""
+        employeeId: options.employeeId
       },
       {
         headers: {
