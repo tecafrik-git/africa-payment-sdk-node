@@ -19,7 +19,7 @@ export const creditCardInvoiceSuccessResponse: PaydunyaCreateInvoiceSuccessRespo
   {
     description: "description",
     response_code: "00",
-    response_text: "https://app.paydunya.com/sandbox/checkout/invoice/token",
+    response_text: "https://app.paydunya.com/sandbox-checkout/invoice/token",
     token: "token",
   };
 
@@ -54,39 +54,40 @@ export const orangeMoneyQrCodeSuccessResponseWithoutUrl: PaydunyaOrangeMoneyPaym
     success: true,
   };
 
-export const getWaveInvoiceSuccessResponse: PaydunyaGetInvoiceSuccessResponse = {
-  actions: {
-    cancel_url: "https://example.com/cancel",
-    return_url: "https://example.com/return",
-    callback_url: "https://example.com/callback",
-  },
-  custom_data: {
-    text_meta: "value",
-    number_meta: 1,
-    boolean_meta: true,
-  },
-  customer: {
-    name: "Mamadou Diallo",
-    email: "mamadou.diallo@yopmail.com",
-    payment_method: "wave_senegal",
-    phone: "+221781234567",
-  },
-  fail_reason: "",
-  hash: "hash",
-  invoice: {
-    description: "description",
-    expire_date: "2021-08-31T00:00:00.000Z",
-    pal_is_on: "",
-    token: "token",
-    total_amount: "100",
-    total_amount_without_fees: "100",
-  },
-  mode: "live",
-  receipt_url: "https://example.com/receipt",
-  response_code: "00",
-  response_text: "success",
-  status: "completed",
-};
+export const getWaveInvoiceSuccessResponse: PaydunyaGetInvoiceSuccessResponse =
+  {
+    actions: {
+      cancel_url: "https://example.com/cancel",
+      return_url: "https://example.com/return",
+      callback_url: "https://example.com/callback",
+    },
+    custom_data: {
+      text_meta: "value",
+      number_meta: 1,
+      boolean_meta: true,
+    },
+    customer: {
+      name: "Mamadou Diallo",
+      email: "mamadou.diallo@yopmail.com",
+      payment_method: "wave_senegal",
+      phone: "+221781234567",
+    },
+    fail_reason: "",
+    hash: "hash",
+    invoice: {
+      description: "description",
+      expire_date: "2021-08-31T00:00:00.000Z",
+      pal_is_on: "",
+      token: "token",
+      total_amount: "100",
+      total_amount_without_fees: "100",
+    },
+    mode: "live",
+    receipt_url: "https://example.com/receipt",
+    response_code: "00",
+    response_text: "success",
+    status: "completed",
+  };
 
 export const createDisburseInvoiceSuccessResponse: PaydunyaCreateDisburseInvoiceSuccessResponse =
   {

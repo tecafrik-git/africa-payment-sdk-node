@@ -51,6 +51,47 @@ afterEach(() => {
   mockApi.reset();
 });
 
+test("uses the official Paydunya sandbox API base URL in test mode", async () => {
+  paydunyaPaymentProvider = new PaydunyaPaymentProvider({
+    masterKey: "masterKey",
+    mode: "test",
+    privateKey: "privateKey",
+    publicKey: "publicKey",
+    store: {
+      name: "store-name",
+    },
+    token: "token",
+    callbackUrl: "https://example.com/callback",
+  });
+  mockApi
+    .onPost("/v1/checkout-invoice/create")
+    .replyOnce(200, createInvoiceSuccessResponse);
+  mockApi
+    .onPost("/v1/softpay/wave-senegal")
+    .replyOnce(200, wavePaymentSuccessResponse);
+
+  await paydunyaPaymentProvider.checkoutMobileMoney({
+    amount: 100,
+    currency: Currency.XOF,
+    customer: {
+      firstName: "Mamadou",
+      lastName: "Diallo",
+      phoneNumber: "+221781234567",
+    },
+    description: "description",
+    paymentMethod: PaymentMethod.WAVE,
+    transactionId: "transactionId",
+  });
+
+  expect(mockApi.history.post).toHaveLength(2);
+  expect(mockApi.history.post[0].baseURL).toBe(
+    "https://app.paydunya.com/sandbox-api/",
+  );
+  expect(mockApi.history.post[1].baseURL).toBe(
+    "https://app.paydunya.com/sandbox-api/",
+  );
+});
+
 test("calls wave API and returns a checkout result on success", async () => {
   mockApi
     .onPost("/v1/checkout-invoice/create")
@@ -189,7 +230,7 @@ test("throws unsupported payment method error when using checkout redirect", asy
       transactionId: "transactionId",
       successRedirectUrl: "https://example.com/success",
       failureRedirectUrl: "https://example.com/failure",
-    })
+    }),
   ).rejects.toThrowErrorMatchingSnapshot();
 });
 
@@ -266,7 +307,7 @@ describe("Orange Money flow detection", () => {
     });
 
     const orangeMoneyRequest = mockApi.history.post.find(
-      (req) => req.url === "/v1/softpay/new-orange-money-senegal"
+      (req) => req.url === "/v1/softpay/new-orange-money-senegal",
     );
     const requestData = JSON.parse(orangeMoneyRequest?.data || "{}");
 
@@ -297,7 +338,7 @@ describe("Orange Money flow detection", () => {
     });
 
     const orangeMoneyRequest = mockApi.history.post.find(
-      (req) => req.url === "/v1/softpay/new-orange-money-senegal"
+      (req) => req.url === "/v1/softpay/new-orange-money-senegal",
     );
     const requestData = JSON.parse(orangeMoneyRequest?.data || "{}");
 
@@ -328,7 +369,7 @@ describe("Orange Money flow detection", () => {
     });
 
     const orangeMoneyRequest = mockApi.history.post.find(
-      (req) => req.url === "/v1/softpay/new-orange-money-senegal"
+      (req) => req.url === "/v1/softpay/new-orange-money-senegal",
     );
     const requestData = JSON.parse(orangeMoneyRequest?.data || "{}");
 
@@ -361,7 +402,7 @@ describe("Orange Money request payload builder", () => {
     });
 
     const orangeMoneyRequest = mockApi.history.post.find(
-      (req) => req.url === "/v1/softpay/new-orange-money-senegal"
+      (req) => req.url === "/v1/softpay/new-orange-money-senegal",
     );
     const requestData = JSON.parse(orangeMoneyRequest?.data || "{}");
 
@@ -396,7 +437,7 @@ describe("Orange Money request payload builder", () => {
     });
 
     const orangeMoneyRequest = mockApi.history.post.find(
-      (req) => req.url === "/v1/softpay/new-orange-money-senegal"
+      (req) => req.url === "/v1/softpay/new-orange-money-senegal",
     );
     const requestData = JSON.parse(orangeMoneyRequest?.data || "{}");
 
@@ -433,7 +474,7 @@ describe("Orange Money QR code payment flow", () => {
     });
 
     expect(checkoutResult.redirectUrl).toBe(
-      "https://qr.paydunya.com/checkout?token=qr-token-123"
+      "https://qr.paydunya.com/checkout?token=qr-token-123",
     );
     expect(checkoutResult.transactionStatus).toBe(TransactionStatus.PENDING);
     expect(checkoutResult.transactionAmount).toBe(5000);
@@ -492,7 +533,7 @@ describe("Orange Money QR code payment flow", () => {
         paymentMethod: PaymentMethod.ORANGE_MONEY,
         transactionId: "test-txn-qr-error",
         // No authorizationCode - triggers QRCODE flow
-      })
+      }),
     ).rejects.toThrow("Payment processing failed");
   });
 
@@ -520,7 +561,7 @@ describe("Orange Money QR code payment flow", () => {
     // Verify that redirectUrl is properly included in CheckoutResult
     expect(checkoutResult).toHaveProperty("redirectUrl");
     expect(checkoutResult.redirectUrl).toBe(
-      "https://qr.paydunya.com/checkout?token=qr-token-123"
+      "https://qr.paydunya.com/checkout?token=qr-token-123",
     );
 
     // Verify all other required fields are present
@@ -599,7 +640,7 @@ describe("Backward compatibility", () => {
 
     // Verify the request was made with OTPCODE api_type
     const orangeMoneyRequest = mockApi.history.post.find(
-      (req) => req.url === "/v1/softpay/new-orange-money-senegal"
+      (req) => req.url === "/v1/softpay/new-orange-money-senegal",
     );
     const requestData = JSON.parse(orangeMoneyRequest?.data || "{}");
     expect(requestData.api_type).toBe("OTPCODE");
@@ -608,7 +649,7 @@ describe("Backward compatibility", () => {
     // Verify the result structure matches expected format
     expect(checkoutResult.transactionId).toBe("test-backward-compat-001");
     expect(checkoutResult.transactionReference).toBe(
-      createInvoiceSuccessResponse.token
+      createInvoiceSuccessResponse.token,
     );
     expect(checkoutResult.transactionStatus).toBe(TransactionStatus.PENDING);
     expect(checkoutResult.transactionAmount).toBe(5000);
@@ -640,7 +681,7 @@ describe("Backward compatibility", () => {
         paymentMethod: PaymentMethod.ORANGE_MONEY,
         transactionId: "test-invalid-otp",
         authorizationCode: "invalid-code",
-      })
+      }),
     ).rejects.toThrow("Invalid or expired OTP code!");
   });
 
@@ -666,7 +707,7 @@ describe("Backward compatibility", () => {
         paymentMethod: PaymentMethod.ORANGE_MONEY,
         transactionId: "test-server-error",
         authorizationCode: "123456",
-      })
+      }),
     ).rejects.toThrow("Internal server error");
   });
 
@@ -684,7 +725,7 @@ describe("Backward compatibility", () => {
         paymentMethod: PaymentMethod.ORANGE_MONEY,
         transactionId: "test-invalid-phone",
         authorizationCode: "123456",
-      })
+      }),
     ).rejects.toThrow();
   });
 });

@@ -150,7 +150,7 @@ exports[`calls paydunya cc API and returns a checkout result on success 1`] = `
 
 exports[`calls paydunya cc API and returns a checkout result on success 2`] = `
 {
-  "redirectUrl": "https://app.paydunya.com/sandbox/checkout/invoice/token",
+  "redirectUrl": "https://app.paydunya.com/sandbox-checkout/invoice/token",
   "transactionAmount": 100,
   "transactionCurrency": "XOF",
   "transactionId": "transactionId",

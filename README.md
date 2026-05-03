@@ -29,9 +29,13 @@ const africaPayments = new AfricaPayments(
     store: {
       name: "Electronics Shop",
     },
+    callbackUrl: "https://example.com/payments/paydunya/webhook",
   })
 );
 ```
+
+Use `mode: "test"` to send Paydunya requests to the official sandbox API
+base URL: `https://app.paydunya.com/sandbox-api/`.
 
 - Checkout so your users can pay
 
@@ -78,12 +82,12 @@ africaPayments.on(PaymentEventType.PAYMENT_SUCCESSFUL, async (event) => {
 });
 ```
 
-
 ## Test with the bogus payment provider
 
 In a testing environment, you do not want to make actual payments. Not all payment providers provide a sandbox mode and even when they do, not all of the features in the sandbox are testable. For integration tests you most likely don't want to involve external APIs, even sandbox ones.
 
 That's why we made a `BogusPaymentProvider` that fakes all the checkout methods and webhook handling logic. It follows simple rules:
+
 - For mobile money checkout, any phone number that ends with `13` will trigger a payment failure event and redirect to the failure url
 - For credit card checkout, any card number that ends with `13` will trigger a payment failure event and redirect to the failure url
 - For redirect checkout, any email that ends with `@failure.com` will trigger a payment failure event and redirect to the failure url
